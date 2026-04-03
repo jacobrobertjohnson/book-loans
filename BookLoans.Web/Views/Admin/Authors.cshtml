@@ -1,0 +1,52 @@
+@model AuthorsIndexViewModel
+@{
+    ViewData["Title"] = "Manage Authors";
+}
+
+<h1>Manage Authors</h1>
+
+<p>
+    <a asp-action="CreateAuthor">Add AuthorEntity</a>
+</p>
+
+@if (TempData["AuthorsError"] is string authorsError)
+{
+    <p>@authorsError</p>
+}
+
+@if (Model.Authors.Count == 0)
+{
+    <p>No authors have been added yet.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Books</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (AuthorViewModel author in Model.Authors)
+        {
+            <tr>
+                <td>@author.Name</td>
+                <td>@author.BookCount</td>
+                <td>
+                    <a asp-action="EditAuthor" asp-route-id="@author.Id">Edit</a>
+                    <form asp-action="DeleteAuthor" asp-route-id="@author.Id" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<p>
+    <a asp-action="Index">Back to Admin</a>
+</p>

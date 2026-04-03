@@ -1,0 +1,23 @@
+@model AuthorFormViewModel
+@{
+    ViewData["Title"] = "Edit AuthorEntity";
+}
+
+<h1>Edit AuthorEntity</h1>
+
+<form asp-action="EditAuthor" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div>
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+<p>
+    <a asp-action="Authors">Back to Authors</a>
+</p>

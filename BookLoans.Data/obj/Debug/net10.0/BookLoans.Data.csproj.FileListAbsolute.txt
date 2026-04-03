@@ -1,0 +1,17 @@
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\bin\Debug\net10.0\BookLoans.Data.deps.json
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\bin\Debug\net10.0\BookLoans.Data.runtimeconfig.json
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\bin\Debug\net10.0\BookLoans.Data.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\bin\Debug\net10.0\BookLoans.Data.pdb
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.csproj.AssemblyReference.cache
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.AssemblyInfoInputs.cache
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.AssemblyInfo.cs
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.csproj.CoreCompileInputs.cache
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\refint\BookLoans.Data.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.pdb
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoans.Data.genruntimeconfig.cache
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\ref\BookLoans.Data.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\bin\Debug\net10.0\BookLoans.Abstractions.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\bin\Debug\net10.0\BookLoans.Abstractions.pdb
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Data\obj\Debug\net10.0\BookLoan.2448C828.Up2Date

@@ -1,0 +1,72 @@
+@model CheckoutsIndexViewModel
+@{
+    ViewData["Title"] = "Checkouts and returns";
+}
+
+<h1>Checkouts and returns</h1>
+
+<p>
+    <a asp-action="CreateCheckout">Add Checkout</a>
+</p>
+
+@if (TempData["CheckoutsError"] is string checkoutsError)
+{
+    <p>@checkoutsError</p>
+}
+
+@if (Model.Checkouts.Count == 0)
+{
+    <p>No checkouts have been created yet.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>BookEntity</th>
+                <th>BorrowerEntity</th>
+                <th>Checked Out</th>
+                <th>Returned</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (BookLoanViewModel checkout in Model.Checkouts)
+        {
+            <tr>
+                <td>
+                    @if (checkout.BookHasDefaultPhoto)
+                    {
+                        <img
+                            src="@Url.Action("BookDefaultPhoto", "Admin", new { id = checkout.BookId })"
+                            alt="Default book image"
+                            style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
+                    }
+                    <a asp-action="EditBook" asp-route-id="@checkout.BookId">@checkout.BookTitle</a>
+                </td>
+                <td>
+                    <a asp-action="EditBorrower" asp-route-id="@checkout.BorrowerId">@checkout.BorrowerFullName</a>
+                </td>
+                <td>@checkout.CheckedOutAtUtc.ToString("u")</td>
+                <td>@(checkout.ReturnedAtUtc?.ToString("u") ?? "(active)")</td>
+                <td>
+                    @if (checkout.ReturnedAtUtc is null)
+                    {
+                        <form asp-action="ReturnCheckout" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="loanId" value="@checkout.Id" />
+                            <input type="hidden" name="returnTo" value="Checkouts" />
+                            <input type="hidden" name="sourceId" value="0" />
+                            <button type="submit">Mark Returned</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<p>
+    <a asp-action="Index">Back to Admin</a>
+</p>

@@ -1,0 +1,56 @@
+@model BorrowersIndexViewModel
+@{
+    ViewData["Title"] = "Manage Borrowers";
+}
+
+<h1>Manage Borrowers</h1>
+
+<p>
+    <a asp-action="CreateBorrower">Add BorrowerEntity</a>
+</p>
+
+@if (TempData["BorrowersError"] is string borrowersError)
+{
+    <p>@borrowersError</p>
+}
+
+@if (Model.Borrowers.Count == 0)
+{
+    <p>No borrowers have been added yet.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Current Books</th>
+                <th>Loan History</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (BorrowerListItemViewModel borrower in Model.Borrowers)
+        {
+            <tr>
+                <td>@borrower.FirstName</td>
+                <td>@borrower.LastName</td>
+                <td>@borrower.CurrentBookCount</td>
+                <td>@borrower.LoanCount</td>
+                <td>
+                    <a asp-action="EditBorrower" asp-route-id="@borrower.Id">Edit</a>
+                    <form asp-action="DeleteBorrower" asp-route-id="@borrower.Id" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<p>
+    <a asp-action="Index">Back to Admin</a>
+</p>

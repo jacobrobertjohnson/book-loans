@@ -1,0 +1,11 @@
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\bin\Debug\net10.0\BookLoans.Abstractions.deps.json
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\bin\Debug\net10.0\BookLoans.Abstractions.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\bin\Debug\net10.0\BookLoans.Abstractions.pdb
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\BookLoans.Abstractions.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\BookLoans.Abstractions.AssemblyInfoInputs.cache
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\BookLoans.Abstractions.AssemblyInfo.cs
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\BookLoans.Abstractions.csproj.CoreCompileInputs.cache
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\BookLoans.Abstractions.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\refint\BookLoans.Abstractions.dll
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\BookLoans.Abstractions.pdb
+C:\Users\Jacob Robert Johnson\source\repos\jacobrobertjohnson\book-loans\BookLoans.Abstractions\obj\Debug\net10.0\ref\BookLoans.Abstractions.dll

@@ -1,0 +1,54 @@
+﻿@model PublicHomepageViewModel
+@{
+    ViewData["Title"] = "Checked Out Books";
+}
+
+<h1>Currently Checked Out Books</h1>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <p>
+        <a asp-controller="Admin" asp-action="Index">Go to Admin</a>
+    </p>
+    <form asp-controller="Account" asp-action="Logout" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit">Log out</button>
+    </form>
+}
+else
+{
+    <p>
+        <a asp-controller="Account" asp-action="Login">Admin Login</a>
+    </p>
+}
+
+@if (Model.BorrowerGroups.Count == 0)
+{
+    <p>No books are currently checked out.</p>
+}
+else
+{
+    @foreach (BorrowerCheckoutGroupViewModel borrowerGroup in Model.BorrowerGroups)
+    {
+        <section>
+            <h2>@borrowerGroup.BorrowerFullName</h2>
+            <ul>
+                @foreach (BookLoanViewModel book in borrowerGroup.Books)
+                {
+                    <li>
+                        @if (book.BookHasDefaultPhoto)
+                        {
+                            <img
+                                src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.BookId })"
+                                alt="Default book image"
+                                style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
+                        }
+                        <strong>@book.BookTitle</strong> by @book.BookAuthorNames
+                        <br />
+                        Checked out: @book.CheckedOutAtUtc.ToString("u")
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}

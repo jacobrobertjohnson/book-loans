@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<h1>Admin</h1>
+<p>Use this area to manage books, borrowers, checkouts, conditions, and photos.</p>
+
+<ul>
+    <li><a asp-action="Books">Books</a></li>
+    <li><a asp-action="Authors">Authors</a></li>
+    <li><a asp-action="Borrowers">Borrowers</a></li>
+    <li><a asp-action="Checkouts">Checkouts and returns</a></li>
+    <li><a asp-action="Conditions">Conditions</a></li>
+</ul>
+
+<p>
+    <a asp-controller="Home" asp-action="Index">Back to Public Homepage</a>
+</p>

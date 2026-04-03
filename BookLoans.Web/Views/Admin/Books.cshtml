@@ -1,0 +1,76 @@
+@model BooksIndexViewModel
+@{
+    ViewData["Title"] = "Manage Books";
+}
+
+<h1>Manage Books</h1>
+
+<p>
+    <a asp-action="CreateBook">Add BookEntity</a>
+</p>
+
+@if (TempData["BooksError"] is string booksError)
+{
+    <p>@booksError</p>
+}
+
+@if (Model.Books.Count == 0)
+{
+    <p>No books have been added yet.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>AuthorEntity</th>
+                <th>ISBN</th>
+                <th>ConditionEntity</th>
+                <th>Checked Out</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (BookListItemViewModel book in Model.Books)
+        {
+            <tr>
+                <td>
+                    @if (book.HasDefaultPhoto)
+                    {
+                        <img
+                            src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.Id })"
+                            alt="Default book image"
+                            style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
+                    }
+                    @book.Title
+                </td>
+                <td>@book.AuthorNames</td>
+                <td>@(string.IsNullOrWhiteSpace(book.Isbn) ? "(none)" : book.Isbn)</td>
+                <td>@book.ConditionName</td>
+                <td>
+                    @if (book.CurrentBorrowerName is null)
+                    {
+                        <text>No</text>
+                    }
+                    else
+                    {
+                        <text>Yes - @book.CurrentBorrowerName (@book.CurrentCheckedOutAtUtc?.ToString("u"))</text>
+                    }
+                </td>
+                <td>
+                    <a asp-action="EditBook" asp-route-id="@book.Id">Edit</a>
+                    <form asp-action="DeleteBook" asp-route-id="@book.Id" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<p>
+    <a asp-action="Index">Back to Admin</a>
+</p>

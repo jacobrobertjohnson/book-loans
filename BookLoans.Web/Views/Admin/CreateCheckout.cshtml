@@ -1,0 +1,41 @@
+@model CheckoutFormViewModel
+@{
+    ViewData["Title"] = "Add Checkout";
+}
+
+<h1>Add Checkout</h1>
+
+<form asp-action="CreateCheckout" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div>
+        <label asp-for="BookId">BookEntity</label>
+        <select asp-for="BookId">
+            @foreach (CheckoutBookOptionViewModel book in Model.Books)
+            {
+                <option value="@book.Id">
+                    @book.Title by @book.AuthorNames@(book.IsCheckedOut ? " (currently checked out)" : string.Empty)
+                </option>
+            }
+        </select>
+        <span asp-validation-for="BookId"></span>
+    </div>
+
+    <div>
+        <label asp-for="BorrowerId">BorrowerEntity</label>
+        <select asp-for="BorrowerId">
+            @foreach (CheckoutBorrowerOptionViewModel borrower in Model.Borrowers)
+            {
+                <option value="@borrower.Id">@borrower.FullName</option>
+            }
+        </select>
+        <span asp-validation-for="BorrowerId"></span>
+    </div>
+
+    <button type="submit">Create Checkout</button>
+</form>
+
+<p>
+    <a asp-action="Checkouts">Back to Checkouts and returns</a>
+</p>

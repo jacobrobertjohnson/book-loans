@@ -1,0 +1,112 @@
+@model BorrowerFormViewModel
+@{
+    ViewData["Title"] = "Edit BorrowerEntity";
+}
+
+<h1>Edit BorrowerEntity</h1>
+
+@if (TempData["EditBorrowerError"] is string editBorrowerError)
+{
+    <p>@editBorrowerError</p>
+}
+
+<form asp-action="EditBorrower" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div>
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" />
+        <span asp-validation-for="FirstName"></span>
+    </div>
+
+    <div>
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" />
+        <span asp-validation-for="LastName"></span>
+    </div>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+<h2>Current Checkouts</h2>
+
+<p>
+    <a asp-action="CreateCheckout" asp-route-borrowerId="@Model.Id">Add Checkout</a>
+</p>
+
+@if (Model.CurrentCheckouts.Count == 0)
+{
+    <p>This borrower has no books currently checked out.</p>
+}
+else
+{
+    <ul>
+    @foreach (BookLoanViewModel checkout in Model.CurrentCheckouts)
+    {
+        <li>
+            @if (checkout.BookHasDefaultPhoto)
+            {
+                <img
+                    src="@Url.Action("BookDefaultPhoto", "Admin", new { id = checkout.BookId })"
+                    alt="Default book image"
+                    style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
+            }
+            <a asp-action="EditBook" asp-route-id="@checkout.BookId">@checkout.BookTitle</a>
+            by @checkout.BookAuthorNames
+            (checked out @checkout.CheckedOutAtUtc.ToString("u"))
+            <form asp-action="ReturnCheckout" method="post" style="display:inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="loanId" value="@checkout.Id" />
+                <input type="hidden" name="returnTo" value="EditBorrower" />
+                <input type="hidden" name="sourceId" value="@Model.Id" />
+                <button type="submit">Mark Returned</button>
+            </form>
+        </li>
+    }
+    </ul>
+}
+
+<h2>Checkout History</h2>
+
+@if (Model.CheckoutHistory.Count == 0)
+{
+    <p>No checkout history for this borrower yet.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>BookEntity</th>
+                <th>Checked Out</th>
+                <th>Returned</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (BookLoanViewModel checkout in Model.CheckoutHistory)
+        {
+            <tr>
+                <td>
+                    @if (checkout.BookHasDefaultPhoto)
+                    {
+                        <img
+                            src="@Url.Action("BookDefaultPhoto", "Admin", new { id = checkout.BookId })"
+                            alt="Default book image"
+                            style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
+                    }
+                    <a asp-action="EditBook" asp-route-id="@checkout.BookId">@checkout.BookTitle</a>
+                    <br />
+                    <small>@checkout.BookAuthorNames</small>
+                </td>
+                <td>@checkout.CheckedOutAtUtc.ToString("u")</td>
+                <td>@(checkout.ReturnedAtUtc?.ToString("u") ?? "(active)")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<p>
+    <a asp-action="Borrowers">Back to Borrowers</a>
+</p>

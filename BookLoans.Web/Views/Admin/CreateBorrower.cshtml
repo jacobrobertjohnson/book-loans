@@ -1,0 +1,29 @@
+@model BorrowerFormViewModel
+@{
+    ViewData["Title"] = "Add BorrowerEntity";
+}
+
+<h1>Add BorrowerEntity</h1>
+
+<form asp-action="CreateBorrower" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div>
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" />
+        <span asp-validation-for="FirstName"></span>
+    </div>
+
+    <div>
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" />
+        <span asp-validation-for="LastName"></span>
+    </div>
+
+    <button type="submit">Save</button>
+</form>
+
+<p>
+    <a asp-action="Borrowers">Back to Borrowers</a>
+</p>

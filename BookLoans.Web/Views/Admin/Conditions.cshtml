@@ -1,0 +1,52 @@
+@model ConditionsIndexViewModel
+@{
+    ViewData["Title"] = "Manage Conditions";
+}
+
+<h1>Manage Conditions</h1>
+
+<p>
+    <a asp-action="CreateCondition">Add ConditionEntity</a>
+</p>
+
+@if (TempData["ConditionsError"] is string conditionsError)
+{
+    <p>@conditionsError</p>
+}
+
+@if (Model.Conditions.Count == 0)
+{
+    <p>No conditions have been added yet.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Books</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (ConditionViewModel condition in Model.Conditions)
+        {
+            <tr>
+                <td>@condition.Name</td>
+                <td>@condition.BookCount</td>
+                <td>
+                    <a asp-action="EditCondition" asp-route-id="@condition.Id">Edit</a>
+                    <form asp-action="DeleteCondition" asp-route-id="@condition.Id" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<p>
+    <a asp-action="Index">Back to Admin</a>
+</p>

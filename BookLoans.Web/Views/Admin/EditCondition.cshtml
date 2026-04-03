@@ -1,0 +1,23 @@
+@model ConditionFormViewModel
+@{
+    ViewData["Title"] = "Edit ConditionEntity";
+}
+
+<h1>Edit ConditionEntity</h1>
+
+<form asp-action="EditCondition" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div>
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+<p>
+    <a asp-action="Conditions">Back to Conditions</a>
+</p>
