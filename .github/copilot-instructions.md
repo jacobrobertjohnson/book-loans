@@ -5,6 +5,9 @@ description: "Repository-wide coding style and architecture preferences for Book
 
 # BookLoans Coding Preferences
 
+## Agent Behavior
+- Before running a build to check for errors, stop the debugger if it's running. After that succeeds, restart the debugger if it was running beforehand.
+
 ## Stack and Architecture
 - Target framework: .NET 10.
 - App type: ASP.NET Core MVC.

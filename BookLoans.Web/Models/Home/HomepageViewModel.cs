@@ -3,11 +3,11 @@ using Mapster;
 
 namespace BookLoans.Web.Models;
 
-public sealed class PublicHomepageViewModel
+public sealed class HomepageViewModel
 {
     public IReadOnlyList<BorrowerCheckoutGroupViewModel> BorrowerGroups { get; init; } = [];
 
-    public static PublicHomepageViewModel FromDtos(IReadOnlyList<BorrowerCheckoutGroup> dtos)
+    public static HomepageViewModel FromDtos(IReadOnlyList<BorrowerCheckoutGroup> dtos)
         => new() { BorrowerGroups = dtos.Adapt<List<BorrowerCheckoutGroupViewModel>>() };
 
     public IReadOnlyList<BorrowerCheckoutGroup> ToDtos()

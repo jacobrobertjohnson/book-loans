@@ -1,26 +1,9 @@
-﻿@model PublicHomepageViewModel
+﻿@model HomepageViewModel
 @{
     ViewData["Title"] = "Checked Out Books";
 }
 
 <h1>Currently Checked Out Books</h1>
-
-@if (User.Identity?.IsAuthenticated == true)
-{
-    <p>
-        <a asp-controller="Admin" asp-action="Index">Go to Admin</a>
-    </p>
-    <form asp-controller="Account" asp-action="Logout" method="post">
-        @Html.AntiForgeryToken()
-        <button type="submit">Log out</button>
-    </form>
-}
-else
-{
-    <p>
-        <a asp-controller="Account" asp-action="Login">Admin Login</a>
-    </p>
-}
 
 @if (Model.BorrowerGroups.Count == 0)
 {
@@ -36,13 +19,11 @@ else
                 @foreach (BookLoanViewModel book in borrowerGroup.Books)
                 {
                     <li>
-                        @if (book.BookHasDefaultPhoto)
-                        {
-                            <img
-                                src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.BookId })"
-                                alt="Default book image"
-                                style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
-                        }
+                        <img
+                            src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.BookId })"
+                            alt="Book cover"
+                            class="media-thumb"
+                            onerror="this.onerror=null;this.src='@Url.Content("~/images/book-fallback.svg")';" />
                         <strong>@book.BookTitle</strong> by @book.BookAuthorNames
                         <br />
                         Checked out: @book.CheckedOutAtUtc.ToString("u")
