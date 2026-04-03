@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsTestProject>true</IsTestProject>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.8.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/BookLoans.Web/BookLoans.Web.csproj" />
+    <ProjectReference Include="../../src/BookLoans.Services/BookLoans.Services.csproj" />
+    <ProjectReference Include="../../src/BookLoans.Data/BookLoans.Data.csproj" />
+    <ProjectReference Include="../../src/BookLoans.Abstractions/BookLoans.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
