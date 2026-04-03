@@ -1,0 +1,37 @@
+﻿@model HomepageViewModel
+@{
+    ViewData["Title"] = "Currently Checked Out";
+}
+
+<h1 class="page-title">Currently Checked Out</h1>
+
+@if (Model.BorrowerGroups.Count == 0)
+{
+    <p class="muted">No books are currently checked out.</p>
+}
+else
+{
+    @foreach (BorrowerCheckoutGroupViewModel borrowerGroup in Model.BorrowerGroups)
+    {
+        <h2 class="borrower-heading">@borrowerGroup.BorrowerFullName</h2>
+        <ul class="photo-grid">
+            @foreach (BookLoanViewModel loan in borrowerGroup.Books)
+            {
+                <li class="photo-card">
+                    <img
+                        src="@Url.Action("BookDefaultPhoto", "Admin", new { id = loan.BookId })"
+                        alt="Book cover"
+                        onerror="this.onerror=null;this.src='@Url.Content("~/images/book-fallback.svg")';" />
+                    <div class="photo-card-meta">
+                        <p class="photo-card-caption"><strong>@loan.BookTitle</strong></p>
+                        @if (!string.IsNullOrEmpty(loan.BookAuthorNames))
+                        {
+                            <p class="muted photo-card-date">@loan.BookAuthorNames</p>
+                        }
+                        <p class="muted photo-card-date">Out since @loan.CheckedOutAtUtc.ToString("MMM d, yyyy")</p>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}

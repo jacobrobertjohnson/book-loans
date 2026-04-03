@@ -496,6 +496,16 @@ td.thumb-cell {
     color: var(--ink-soft);
 }
 
+.borrower-heading {
+    margin: 24px 0 10px;
+    font-size: 1.15rem;
+    color: var(--ink);
+}
+
+.borrower-heading:first-of-type {
+    margin-top: 8px;
+}
+
 @media (max-width: 860px) {
     .form-grid {
         grid-template-columns: 1fr;
