@@ -3,6 +3,7 @@ using BookLoans.Data;
 using BookLoans.Data.Entities;
 using BookLoans.Data.Repositories;
 using BookLoans.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,8 +15,24 @@ if (builder.Environment.IsDevelopment())
 {
     mvcBuilder.AddRazorRuntimeCompilation();
 }
+
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+
+SqliteConnectionStringBuilder sqliteConnection = new(connectionString);
+if (!string.IsNullOrWhiteSpace(sqliteConnection.DataSource) && !Path.IsPathRooted(sqliteConnection.DataSource))
+{
+    sqliteConnection.DataSource = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, sqliteConnection.DataSource));
+}
+
+string? databaseDirectory = Path.GetDirectoryName(sqliteConnection.DataSource);
+if (!string.IsNullOrWhiteSpace(databaseDirectory))
+{
+    Directory.CreateDirectory(databaseDirectory);
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(sqliteConnection.ToString()));
 builder.Services.AddScoped<IAdminAuthorRepository, AdminAuthorRepository>();
 builder.Services.AddScoped<IAdminBookRepository, AdminBookRepository>();
 builder.Services.AddScoped<IAdminBorrowerRepository, AdminBorrowerRepository>();
