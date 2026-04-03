@@ -3,9 +3,86 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BookLoans.Web</title>
+    <title>@ViewData["Title"] - Book Loans</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    @RenderBody()
+    @{
+        string controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+        string action = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+        bool isAdminScreen = string.Equals(controller, "Admin", StringComparison.OrdinalIgnoreCase);
+        string title = ViewData["Title"]?.ToString() ?? action;
+
+        string? parentAction = action switch {
+            var a when a.StartsWith("EditBook") || a.StartsWith("CreateBook") => "Books",
+            var a when a.StartsWith("EditBorrower") || a.StartsWith("CreateBorrower") => "Borrowers",
+            var a when a.StartsWith("EditAuthor") || a.StartsWith("CreateAuthor") => "Authors",
+            var a when a.StartsWith("EditCondition") || a.StartsWith("CreateCondition") => "Conditions",
+            var a when a.StartsWith("CreateCheckout") => "Checkouts",
+            _ => null
+        };
+        string? parentTitle = parentAction switch {
+            "Books" => "Manage Books",
+            "Borrowers" => "Manage Borrowers",
+            "Authors" => "Manage Authors",
+            "Conditions" => "Manage Conditions",
+            "Checkouts" => "Checkouts and Returns",
+            _ => null
+        };
+    }
+
+    <header class="app-header">
+        <div class="header-inner">
+            <a class="brand" asp-controller="Home" asp-action="Index">Book Loans</a>
+            <nav class="top-nav" aria-label="Primary">
+                <a asp-controller="Home" asp-action="Index">Home</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Admin" asp-action="Index">Admin</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">Log out</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login">Admin Login</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        @if (isAdminScreen)
+        {
+            <nav class="breadcrumbs" aria-label="Breadcrumb">
+                <a asp-controller="Home" asp-action="Index">Home</a>
+                <span class="breadcrumb-sep">/</span>
+                <a asp-controller="Admin" asp-action="Index">Admin</a>
+                @if (parentAction is not null && parentTitle is not null)
+                {
+                    <span class="breadcrumb-sep">/</span>
+                    <a asp-controller="Admin" asp-action="@parentAction">@parentTitle</a>
+                    <span class="breadcrumb-sep">/</span>
+                    <span>@title</span>
+                }
+                else if (!string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="breadcrumb-sep">/</span>
+                    <span>@title</span>
+                }
+            </nav>
+
+            <nav class="admin-shortcuts" aria-label="Admin sections">
+                <a class="chip-link @(string.Equals(action, "Checkouts", StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" asp-controller="Admin" asp-action="Checkouts">Checkouts</a>
+                <a class="chip-link @(string.Equals(action, "Borrowers", StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" asp-controller="Admin" asp-action="Borrowers">Borrowers</a>
+                <a class="chip-link @(string.Equals(action, "Books", StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" asp-controller="Admin" asp-action="Books">Books</a>
+                <a class="chip-link @(string.Equals(action, "Authors", StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" asp-controller="Admin" asp-action="Authors">Authors</a>
+                <a class="chip-link @(string.Equals(action, "Conditions", StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty)" asp-controller="Admin" asp-action="Conditions">Conditions</a>
+            </nav>
+        }
+
+        @RenderBody()
+    </main>
 </body>
 </html>

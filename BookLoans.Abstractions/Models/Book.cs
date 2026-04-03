@@ -16,6 +16,8 @@ public class Book
 
     public string? CurrentBorrowerName { get; init; }
 
+    public int? CurrentBorrowerId { get; init; }
+
     public DateTime? CurrentCheckedOutAtUtc { get; init; }
 
     public IReadOnlyList<int> SelectedAuthorIds { get; init; } = [];

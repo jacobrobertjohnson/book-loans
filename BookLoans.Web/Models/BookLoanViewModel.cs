@@ -15,6 +15,8 @@ public class BookLoanViewModel
 
     public string BookAuthorNames { get; init; } = string.Empty;
 
+    public IReadOnlyList<Author> BookAuthors { get; init; } = [];
+
     public int BorrowerId { get; init; }
 
     public string BorrowerFullName { get; init; } = string.Empty;

@@ -1,141 +1,106 @@
 @model BookFormViewModel
 @{
-    ViewData["Title"] = "Edit BookEntity";
+    ViewData["Title"] = "Edit Book";
 }
 
-<h1>Edit BookEntity</h1>
+<div class="page-title-row">
+    <a class="back-arrow" asp-action="Books" title="Back to Manage Books">&#8592;</a>
+    <h1 class="page-title">Edit Book</h1>
+</div>
 
 @if (TempData["EditBookError"] is string editBookError)
 {
-    <p>@editBookError</p>
+    <p class="message-error">@editBookError</p>
 }
 
-<form asp-action="EditBook" asp-route-id="@Model.Id" method="post">
+<form asp-action="EditBook" asp-route-id="@Model.Id" method="post" class="form-shell">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly"></div>
+    <div asp-validation-summary="ModelOnly" class="message-error"></div>
 
-    <div>
-        <label asp-for="Title"></label>
-        <input asp-for="Title" />
-        <span asp-validation-for="Title"></span>
+    <section class="form-section">
+        <h2>Core Details</h2>
+        <div class="form-grid">
+            <div class="field">
+                <label asp-for="Title">Book Title <small class="required-note">(required)</small></label>
+                <input asp-for="Title" />
+                <span asp-validation-for="Title"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Isbn">ISBN</label>
+                <input asp-for="Isbn" />
+                <span asp-validation-for="Isbn"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="ConditionId">Condition <small class="required-note">(required)</small></label>
+                <select asp-for="ConditionId" asp-items="@(new SelectList(Model.Conditions, nameof(ConditionViewModel.Id), nameof(ConditionViewModel.Name)))"></select>
+                <span asp-validation-for="ConditionId"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="YearFirstPublished">First Published Year <small class="required-note">(required)</small></label>
+                <input asp-for="YearFirstPublished" />
+                <span asp-validation-for="YearFirstPublished"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Edition"></label>
+                <input asp-for="Edition" />
+                <span asp-validation-for="Edition"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="YearEditionPublished">Edition Published Year</label>
+                <input asp-for="YearEditionPublished" />
+                <span asp-validation-for="YearEditionPublished"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="DateOfPurchase">Purchase Date</label>
+                <input asp-for="DateOfPurchase" />
+                <span asp-validation-for="DateOfPurchase"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="LocationOfPurchase">Purchase Location</label>
+                <input asp-for="LocationOfPurchase" />
+                <span asp-validation-for="LocationOfPurchase"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <h2>Authors</h2>
+        <div class="form-grid">
+            <div class="field">
+                <label asp-for="SelectedAuthorIds">Existing Authors</label>
+                <select asp-for="SelectedAuthorIds" asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.MultiSelectList(Model.Authors, nameof(AuthorViewModel.Id), nameof(AuthorViewModel.Name), Model.SelectedAuthorIds))" class="authors-input" multiple size="8"></select>
+                <div class="actions-row">
+                    <button type="button" onclick="clearSelectedAuthors(this)">Clear selected authors</button>
+                </div>
+                <span asp-validation-for="SelectedAuthorIds"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="NewAuthorNames">Create New Author(s)</label>
+                <textarea asp-for="NewAuthorNames" class="authors-input" rows="5"></textarea>
+                <small>Enter one author name per line.</small>
+                <span asp-validation-for="NewAuthorNames"></span>
+            </div>
+        </div>
+    </section>
+
+    <div class="actions-row">
+        <button type="submit" class="button-primary">Save Changes</button>
     </div>
-
-    <div>
-        <label asp-for="SelectedAuthorIds">Existing Authors</label>
-        <select asp-for="SelectedAuthorIds" asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.MultiSelectList(Model.Authors, nameof(AuthorViewModel.Id), nameof(AuthorViewModel.Name), Model.SelectedAuthorIds))" multiple size="8">
-        </select>
-        <button type="button" onclick="clearSelectedAuthors(this)">Clear selected authors</button>
-        <span asp-validation-for="SelectedAuthorIds"></span>
-    </div>
-
-    <div>
-        <label asp-for="NewAuthorNames">Or Create New AuthorEntity(s)</label>
-        <textarea asp-for="NewAuthorNames" rows="5"></textarea>
-        <small>Enter one author name per line.</small>
-        <span asp-validation-for="NewAuthorNames"></span>
-    </div>
-
-    <div>
-        <label asp-for="Edition"></label>
-        <input asp-for="Edition" />
-        <span asp-validation-for="Edition"></span>
-    </div>
-
-    <div>
-        <label asp-for="YearFirstPublished"></label>
-        <input asp-for="YearFirstPublished" />
-        <span asp-validation-for="YearFirstPublished"></span>
-    </div>
-
-    <div>
-        <label asp-for="YearEditionPublished"></label>
-        <input asp-for="YearEditionPublished" />
-        <span asp-validation-for="YearEditionPublished"></span>
-    </div>
-
-    <div>
-        <label asp-for="Isbn">ISBN (optional)</label>
-        <input asp-for="Isbn" />
-        <span asp-validation-for="Isbn"></span>
-    </div>
-
-    <div>
-        <label asp-for="DateOfPurchase"></label>
-        <input asp-for="DateOfPurchase" />
-        <span asp-validation-for="DateOfPurchase"></span>
-    </div>
-
-    <div>
-        <label asp-for="LocationOfPurchase"></label>
-        <input asp-for="LocationOfPurchase" />
-        <span asp-validation-for="LocationOfPurchase"></span>
-    </div>
-
-    <div>
-        <label asp-for="ConditionId"></label>
-        <select asp-for="ConditionId" asp-items="@(new SelectList(Model.Conditions, nameof(ConditionViewModel.Id), nameof(ConditionViewModel.Name)))"></select>
-        <span asp-validation-for="ConditionId"></span>
-    </div>
-
-    <button type="submit">Save Changes</button>
 </form>
 
-<h2>Photos</h2>
-
-<form asp-action="UploadBookPhoto" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
-    @Html.AntiForgeryToken()
-    <div>
-        <label for="photoFile">Upload New Photo</label>
-        <input type="file" id="photoFile" name="photoFile" accept="image/*" />
-    </div>
-    <div>
-        <label for="caption">Caption (optional)</label>
-        <input type="text" id="caption" name="caption" maxlength="500" />
-    </div>
-    <button type="submit">Upload Photo</button>
-</form>
-
-@if (Model.BookPhotos.Count == 0)
-{
-    <p>No photos uploaded yet.</p>
-}
-else
-{
-    <ul style="list-style:none; padding-left:0; display:flex; flex-wrap:wrap; gap:16px;">
-    @foreach (BookPhotoItemViewModel photo in Model.BookPhotos)
-    {
-        <li style="border:1px solid #ccc; padding:8px; width:170px;">
-            <img
-                src="@Url.Action("BookPhotoEntity", "Admin", new { id = photo.Id })"
-                alt="BookEntity photo"
-                style="display:block; width:150px; height:150px; object-fit:cover;" />
-            @if (photo.IsDefault)
-            {
-                <p style="margin:8px 0 4px 0;"><strong>Default Image</strong></p>
-            }
-            <p style="margin:8px 0 4px 0;">@(string.IsNullOrWhiteSpace(photo.Caption) ? "(no caption)" : photo.Caption)</p>
-            <p style="margin:0 0 8px 0;">@photo.UploadedAtUtc.ToString("u")</p>
-            @if (!photo.IsDefault)
-            {
-                <form asp-action="SetDefaultBookPhoto" asp-route-id="@Model.Id" asp-route-photoId="@photo.Id" method="post" style="margin-bottom:8px;">
-                    @Html.AntiForgeryToken()
-                    <button type="submit">Set As Default</button>
-                </form>
-            }
-            <form asp-action="DeleteBookPhoto" asp-route-id="@Model.Id" asp-route-photoId="@photo.Id" method="post">
-                @Html.AntiForgeryToken()
-                <button type="submit">Delete</button>
-            </form>
-        </li>
-    }
-    </ul>
-}
-
-<h2>Checkout Status</h2>
-
-<p>
-    <a asp-action="CreateCheckout" asp-route-bookId="@Model.Id">Add Checkout</a>
-</p>
+<div class="card stack">
+<div class="card-header">
+    <h2 class="page-title">Checkout Status</h2>
+    <a class="button button-primary" asp-action="CreateCheckout" asp-route-bookId="@Model.Id">Add Checkout</a>
+</div>
 
 @if (Model.CurrentCheckout is null)
 {
@@ -148,7 +113,7 @@ else
         <a asp-action="EditBorrower" asp-route-id="@Model.CurrentCheckout.BorrowerId">@Model.CurrentCheckout.BorrowerFullName</a>
         on @Model.CurrentCheckout.CheckedOutAtUtc.ToString("u").
     </p>
-    <form asp-action="ReturnCheckout" method="post">
+    <form asp-action="ReturnCheckout" method="post" class="inline submit-right">
         @Html.AntiForgeryToken()
         <input type="hidden" name="loanId" value="@Model.CurrentCheckout.Id" />
         <input type="hidden" name="returnTo" value="EditBook" />
@@ -156,8 +121,12 @@ else
         <button type="submit">Mark Returned</button>
     </form>
 }
+</div>
 
-<h2>Checkout History</h2>
+<div class="card stack">
+<div class="card-header">
+    <h2 class="page-title">Checkout History</h2>
+</div>
 
 @if (Model.CheckoutHistory.Count == 0)
 {
@@ -165,10 +134,11 @@ else
 }
 else
 {
+    <div class="table-wrap">
     <table>
         <thead>
             <tr>
-                <th>BorrowerEntity</th>
+                <th>Borrower</th>
                 <th>Checked Out</th>
                 <th>Returned</th>
             </tr>
@@ -186,11 +156,80 @@ else
         }
         </tbody>
     </table>
+    </div>
 }
+</div>
 
-<p>
-    <a asp-action="Books">Back to Books</a>
-</p>
+<div class="card stack">
+<div class="card-header">
+    <h2 class="page-title">Photos</h2>
+</div>
+
+<section class="form-section stack">
+    <h3>Upload Photo</h3>
+
+    <form asp-action="UploadBookPhoto" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="stack">
+        @Html.AntiForgeryToken()
+        <div class="form-grid">
+            <div class="field">
+                <label for="photoFile">Photo File</label>
+                <input type="file" id="photoFile" name="photoFile" accept="image/*" />
+            </div>
+            <div class="field">
+                <label for="caption">Caption (optional)</label>
+                <input type="text" id="caption" name="caption" maxlength="500" />
+            </div>
+        </div>
+        <div class="actions-row">
+            <button type="submit">Upload Photo</button>
+        </div>
+    </form>
+</section>
+
+@if (Model.BookPhotos.Count == 0)
+{
+    <p>No photos uploaded yet.</p>
+}
+else
+{
+    <ul class="photo-grid">
+    @foreach (BookPhotoItemViewModel photo in Model.BookPhotos)
+    {
+        <li class="photo-card">
+            <img
+                src="@Url.Action("BookPhotoEntity", "Admin", new { id = photo.Id })"
+                alt="Book photo"
+                 />
+            <div class="photo-card-meta">
+                <p class="photo-card-caption">@(string.IsNullOrWhiteSpace(photo.Caption) ? "(no caption)" : photo.Caption)</p>
+                <p class="muted photo-card-date">@photo.UploadedAtUtc.ToString("u")</p>
+            </div>
+            <div class="photo-card-actions">
+                @if (photo.IsDefault)
+                {
+                    <button type="button" class="default-photo-button" disabled>Default</button>
+                }
+                else
+                {
+                    <form asp-action="SetDefaultBookPhoto" asp-route-id="@Model.Id" asp-route-photoId="@photo.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">Set As Default</button>
+                    </form>
+                }
+                <form asp-action="DeleteBookPhoto" asp-route-id="@Model.Id" asp-route-photoId="@photo.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="button-danger delete-photo-button" aria-label="Delete photo" title="Delete photo">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M9 3h6l1 2h4v2h-2l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7H4V5h4l1-2Zm0 4 1 13h4l1-13H9Zm2 3h2v8h-2v-8Z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </li>
+    }
+    </ul>
+}
+</div>
 
 <script>
     function clearSelectedAuthors(button) {

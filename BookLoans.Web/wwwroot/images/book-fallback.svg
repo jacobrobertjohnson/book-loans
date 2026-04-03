@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Book placeholder">
+  <!-- Book cover (full) -->
+  <rect x="0" y="0" width="128" height="128" fill="#c9a876" rx="2"/>
+  
+  <!-- Spine edge (wider) -->
+  <rect x="0" y="0" width="16" height="128" fill="#8b7355"/>
+  
+  <!-- Book highlight/edge -->
+  <rect x="16" y="0" width="112" height="5" fill="#dbb88d"/>
+  
+  <!-- Decorative title area -->
+  <rect x="32" y="16" width="73" height="4" fill="#8b6f47" opacity="0.6"/>
+  <rect x="32" y="22" width="73" height="2.5" fill="#8b6f47" opacity="0.4"/>
+  
+  <!-- Pages/text effect (thicker lines) -->
+  <line x1="32" y1="38" x2="105" y2="38" stroke="#8b7355" stroke-width="3.5" opacity="0.5"/>
+  <line x1="32" y1="50" x2="105" y2="50" stroke="#8b7355" stroke-width="3.5" opacity="0.5"/>
+  <line x1="32" y1="62" x2="105" y2="62" stroke="#8b7355" stroke-width="3.5" opacity="0.5"/>
+  <line x1="32" y1="74" x2="105" y2="74" stroke="#8b7355" stroke-width="3.5" opacity="0.5"/>
+  <line x1="32" y1="86" x2="95" y2="86" stroke="#8b7355" stroke-width="3.5" opacity="0.5"/>
+  <line x1="32" y1="98" x2="105" y2="98" stroke="#8b7355" stroke-width="3.5" opacity="0.5"/>
+</svg>

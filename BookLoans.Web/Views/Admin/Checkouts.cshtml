@@ -3,28 +3,27 @@
     ViewData["Title"] = "Checkouts and returns";
 }
 
-<h1>Checkouts and returns</h1>
-
-<p>
-    <a asp-action="CreateCheckout">Add Checkout</a>
-</p>
-
 @if (TempData["CheckoutsError"] is string checkoutsError)
 {
-    <p>@checkoutsError</p>
+    <p class="message-error">@checkoutsError</p>
 }
 
 @if (Model.Checkouts.Count == 0)
 {
-    <p>No checkouts have been created yet.</p>
+    <div class="card"><p class="muted">No checkouts have been created yet.</p></div>
 }
 else
 {
+    <div class="card table-wrap">
+        <div class="card-header">
+            <h1 class="page-title">Checkouts and Returns</h1>
+            <a class="button button-primary" asp-action="CreateCheckout">Add Checkout</a>
+        </div>
     <table>
         <thead>
             <tr>
-                <th>BookEntity</th>
-                <th>BorrowerEntity</th>
+                <th>Book</th>
+                <th>Borrower</th>
                 <th>Checked Out</th>
                 <th>Returned</th>
                 <th>Actions</th>
@@ -35,13 +34,11 @@ else
         {
             <tr>
                 <td>
-                    @if (checkout.BookHasDefaultPhoto)
-                    {
-                        <img
-                            src="@Url.Action("BookDefaultPhoto", "Admin", new { id = checkout.BookId })"
-                            alt="Default book image"
-                            style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
-                    }
+                    <img
+                        src="@Url.Action("BookDefaultPhoto", "Admin", new { id = checkout.BookId })"
+                        alt="Book cover"
+                        class="media-thumb"
+                        onerror="this.onerror=null;this.src='@Url.Content("~/images/book-fallback.svg")';" />
                     <a asp-action="EditBook" asp-route-id="@checkout.BookId">@checkout.BookTitle</a>
                 </td>
                 <td>
@@ -52,7 +49,7 @@ else
                 <td>
                     @if (checkout.ReturnedAtUtc is null)
                     {
-                        <form asp-action="ReturnCheckout" method="post" style="display:inline">
+                        <form asp-action="ReturnCheckout" method="post" class="inline submit-right">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="loanId" value="@checkout.Id" />
                             <input type="hidden" name="returnTo" value="Checkouts" />
@@ -65,8 +62,5 @@ else
         }
         </tbody>
     </table>
+    </div>
 }
-
-<p>
-    <a asp-action="Index">Back to Admin</a>
-</p>

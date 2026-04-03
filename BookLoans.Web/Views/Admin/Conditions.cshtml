@@ -3,23 +3,22 @@
     ViewData["Title"] = "Manage Conditions";
 }
 
-<h1>Manage Conditions</h1>
-
-<p>
-    <a asp-action="CreateCondition">Add ConditionEntity</a>
-</p>
-
 @if (TempData["ConditionsError"] is string conditionsError)
 {
-    <p>@conditionsError</p>
+    <p class="message-error">@conditionsError</p>
 }
 
 @if (Model.Conditions.Count == 0)
 {
-    <p>No conditions have been added yet.</p>
+    <div class="card"><p class="muted">No conditions have been added yet.</p></div>
 }
 else
 {
+    <div class="card table-wrap">
+        <div class="card-header">
+            <h1 class="page-title">Manage Conditions</h1>
+            <a class="button button-primary" asp-action="CreateCondition">Add Condition</a>
+        </div>
     <table>
         <thead>
             <tr>
@@ -32,21 +31,17 @@ else
         @foreach (ConditionViewModel condition in Model.Conditions)
         {
             <tr>
-                <td>@condition.Name</td>
+                <td><a asp-action="EditCondition" asp-route-id="@condition.Id">@condition.Name</a></td>
                 <td>@condition.BookCount</td>
                 <td>
-                    <a asp-action="EditCondition" asp-route-id="@condition.Id">Edit</a>
-                    <form asp-action="DeleteCondition" asp-route-id="@condition.Id" method="post" style="display:inline">
+                    <form asp-action="DeleteCondition" asp-route-id="@condition.Id" method="post" class="inline">
                         @Html.AntiForgeryToken()
-                        <button type="submit">Delete</button>
+                        <button type="submit" class="button-danger">Delete</button>
                     </form>
                 </td>
             </tr>
         }
         </tbody>
     </table>
+    </div>
 }
-
-<p>
-    <a asp-action="Index">Back to Admin</a>
-</p>

@@ -1,83 +1,95 @@
 @model BookFormViewModel
 @{
-    ViewData["Title"] = "Add BookEntity";
+    ViewData["Title"] = "Create Book";
 }
 
-<h1>Add BookEntity</h1>
+<div class="page-title-row">
+    <a class="back-arrow" asp-action="Books" title="Back to Manage Books">&#8592;</a>
+    <h1 class="page-title">Create Book</h1>
+</div>
 
-<form asp-action="CreateBook" method="post">
+<form asp-action="CreateBook" method="post" class="form-shell">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly"></div>
+    <div asp-validation-summary="ModelOnly" class="message-error"></div>
 
-    <div>
-        <label asp-for="Title"></label>
-        <input asp-for="Title" />
-        <span asp-validation-for="Title"></span>
+    <section class="form-section">
+        <h2>Core Details</h2>
+        <div class="form-grid">
+            <div class="field">
+                <label asp-for="Title">Book Title <small class="required-note">(required)</small></label>
+                <input asp-for="Title" />
+                <span asp-validation-for="Title"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Isbn">ISBN</label>
+                <input asp-for="Isbn" />
+                <span asp-validation-for="Isbn"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="ConditionId">Condition <small class="required-note">(required)</small></label>
+                <select asp-for="ConditionId" asp-items="@(new SelectList(Model.Conditions, nameof(ConditionViewModel.Id), nameof(ConditionViewModel.Name)))"></select>
+                <span asp-validation-for="ConditionId"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="YearFirstPublished">First Published Year <small class="required-note">(required)</small></label>
+                <input asp-for="YearFirstPublished" />
+                <span asp-validation-for="YearFirstPublished"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Edition"></label>
+                <input asp-for="Edition" />
+                <span asp-validation-for="Edition"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="YearEditionPublished">Edition Published Year</label>
+                <input asp-for="YearEditionPublished" />
+                <span asp-validation-for="YearEditionPublished"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="DateOfPurchase">Purchase Date</label>
+                <input asp-for="DateOfPurchase" />
+                <span asp-validation-for="DateOfPurchase"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="LocationOfPurchase">Purchase Location</label>
+                <input asp-for="LocationOfPurchase" />
+                <span asp-validation-for="LocationOfPurchase"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <h2>Authors</h2>
+        <div class="form-grid">
+            <div class="field">
+                <label asp-for="SelectedAuthorIds">Existing Authors</label>
+                <select asp-for="SelectedAuthorIds" asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.MultiSelectList(Model.Authors, nameof(AuthorViewModel.Id), nameof(AuthorViewModel.Name), Model.SelectedAuthorIds))" class="authors-input" multiple size="8"></select>
+                <div class="actions-row">
+                    <button type="button" onclick="clearSelectedAuthors(this)">Clear selected authors</button>
+                </div>
+                <span asp-validation-for="SelectedAuthorIds"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="NewAuthorNames">Create New Author(s)</label>
+                <textarea asp-for="NewAuthorNames" class="authors-input" rows="5"></textarea>
+                <small>Enter one author name per line.</small>
+                <span asp-validation-for="NewAuthorNames"></span>
+            </div>
+        </div>
+    </section>
+
+    <div class="actions-row">
+        <button type="submit" class="button-primary">Save</button>
     </div>
-
-    <div>
-        <label asp-for="SelectedAuthorIds">Existing Authors</label>
-        <select asp-for="SelectedAuthorIds" asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.MultiSelectList(Model.Authors, nameof(AuthorViewModel.Id), nameof(AuthorViewModel.Name), Model.SelectedAuthorIds))" multiple size="8">
-        </select>
-        <button type="button" onclick="clearSelectedAuthors(this)">Clear selected authors</button>
-        <span asp-validation-for="SelectedAuthorIds"></span>
-    </div>
-
-    <div>
-        <label asp-for="NewAuthorNames">Or Create New AuthorEntity(s)</label>
-        <textarea asp-for="NewAuthorNames" rows="5"></textarea>
-        <small>Enter one author name per line.</small>
-        <span asp-validation-for="NewAuthorNames"></span>
-    </div>
-
-    <div>
-        <label asp-for="Edition"></label>
-        <input asp-for="Edition" />
-        <span asp-validation-for="Edition"></span>
-    </div>
-
-    <div>
-        <label asp-for="YearFirstPublished"></label>
-        <input asp-for="YearFirstPublished" />
-        <span asp-validation-for="YearFirstPublished"></span>
-    </div>
-
-    <div>
-        <label asp-for="YearEditionPublished"></label>
-        <input asp-for="YearEditionPublished" />
-        <span asp-validation-for="YearEditionPublished"></span>
-    </div>
-
-    <div>
-        <label asp-for="Isbn">ISBN (optional)</label>
-        <input asp-for="Isbn" />
-        <span asp-validation-for="Isbn"></span>
-    </div>
-
-    <div>
-        <label asp-for="DateOfPurchase"></label>
-        <input asp-for="DateOfPurchase" />
-        <span asp-validation-for="DateOfPurchase"></span>
-    </div>
-
-    <div>
-        <label asp-for="LocationOfPurchase"></label>
-        <input asp-for="LocationOfPurchase" />
-        <span asp-validation-for="LocationOfPurchase"></span>
-    </div>
-
-    <div>
-        <label asp-for="ConditionId"></label>
-        <select asp-for="ConditionId" asp-items="@(new SelectList(Model.Conditions, nameof(ConditionViewModel.Id), nameof(ConditionViewModel.Name)))"></select>
-        <span asp-validation-for="ConditionId"></span>
-    </div>
-
-    <button type="submit">Save</button>
 </form>
-
-<p>
-    <a asp-action="Books">Back to Books</a>
-</p>
 
 <script>
     function clearSelectedAuthors(button) {

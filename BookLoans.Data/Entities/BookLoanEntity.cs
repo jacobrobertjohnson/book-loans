@@ -25,6 +25,14 @@ public class BookLoanEntity
             BookId = BookId,
             BookTitle = BookEntity.Title,
             BookHasDefaultPhoto = BookEntity.Photos.Count > 0,
+            BookAuthors = BookEntity.BookAuthors
+                .OrderBy(bookAuthor => bookAuthor.AuthorEntity.Name)
+                .Select(bookAuthor => new Author
+                {
+                    Id = bookAuthor.AuthorEntity.Id,
+                    Name = bookAuthor.AuthorEntity.Name
+                })
+                .ToList(),
             BookAuthorNames = BookEntity.BookAuthors.Count == 0
                 ? "(unknown)"
                 : string.Join(

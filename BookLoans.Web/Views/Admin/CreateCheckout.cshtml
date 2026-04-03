@@ -1,41 +1,48 @@
 @model CheckoutFormViewModel
 @{
-    ViewData["Title"] = "Add Checkout";
+    ViewData["Title"] = "Create Checkout";
 }
 
-<h1>Add Checkout</h1>
+<div class="page-title-row">
+    <a class="back-arrow" asp-action="Checkouts" title="Back to Checkouts">&#8592;</a>
+    <h1 class="page-title">Create Checkout</h1>
+</div>
 
-<form asp-action="CreateCheckout" method="post">
+<form asp-action="CreateCheckout" method="post" class="form-shell">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly"></div>
+    <div asp-validation-summary="ModelOnly" class="message-error"></div>
 
-    <div>
-        <label asp-for="BookId">BookEntity</label>
-        <select asp-for="BookId">
-            @foreach (CheckoutBookOptionViewModel book in Model.Books)
-            {
-                <option value="@book.Id">
-                    @book.Title by @book.AuthorNames@(book.IsCheckedOut ? " (currently checked out)" : string.Empty)
-                </option>
-            }
-        </select>
-        <span asp-validation-for="BookId"></span>
+    <section class="form-section">
+        <h2>Checkout Details</h2>
+        <div class="form-grid">
+            <div class="field">
+                <label asp-for="BookId">Book</label>
+                <select asp-for="BookId">
+                    @foreach (CheckoutBookOptionViewModel book in Model.Books)
+                    {
+                        <option value="@book.Id">
+                            @book.Title by @book.AuthorNames@(book.IsCheckedOut ? " (currently checked out)" : string.Empty)
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="BookId"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="BorrowerId">Borrower</label>
+                <select asp-for="BorrowerId">
+                    @foreach (CheckoutBorrowerOptionViewModel borrower in Model.Borrowers)
+                    {
+                        <option value="@borrower.Id">@borrower.FullName</option>
+                    }
+                </select>
+                <span asp-validation-for="BorrowerId"></span>
+            </div>
+        </div>
+    </section>
+
+    <div class="actions-row">
+        <button type="submit" class="button-primary">Create Checkout</button>
+
     </div>
-
-    <div>
-        <label asp-for="BorrowerId">BorrowerEntity</label>
-        <select asp-for="BorrowerId">
-            @foreach (CheckoutBorrowerOptionViewModel borrower in Model.Borrowers)
-            {
-                <option value="@borrower.Id">@borrower.FullName</option>
-            }
-        </select>
-        <span asp-validation-for="BorrowerId"></span>
-    </div>
-
-    <button type="submit">Create Checkout</button>
 </form>
-
-<p>
-    <a asp-action="Checkouts">Back to Checkouts and returns</a>
-</p>

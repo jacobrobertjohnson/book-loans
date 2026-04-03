@@ -21,6 +21,10 @@ public class BookListItemViewModel
 
     public string? CurrentBorrowerName { get; init; }
 
+    public int? CurrentBorrowerId { get; init; }
+
+    public IReadOnlyList<Author> Authors { get; init; } = [];
+
     public static BookListItemViewModel FromDto(Book dto)
         => dto.Adapt<BookListItemViewModel>();
 

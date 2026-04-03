@@ -3,30 +3,28 @@
     ViewData["Title"] = "Manage Books";
 }
 
-<h1>Manage Books</h1>
-
-<p>
-    <a asp-action="CreateBook">Add BookEntity</a>
-</p>
-
 @if (TempData["BooksError"] is string booksError)
 {
-    <p>@booksError</p>
+    <p class="message-error">@booksError</p>
 }
 
 @if (Model.Books.Count == 0)
 {
-    <p>No books have been added yet.</p>
+    <div class="card"><p class="muted">No books have been added yet.</p></div>
 }
 else
 {
+    <div class="card table-wrap">
+        <div class="card-header">
+            <h1 class="page-title">Manage Books</h1>
+            <a class="button button-primary" asp-action="CreateBook">Add Book</a>
+        </div>
     <table>
         <thead>
             <tr>
+                <th></th>
                 <th>Title</th>
-                <th>AuthorEntity</th>
-                <th>ISBN</th>
-                <th>ConditionEntity</th>
+                <th>Author</th>
                 <th>Checked Out</th>
                 <th>Actions</th>
             </tr>
@@ -35,42 +33,42 @@ else
         @foreach (BookListItemViewModel book in Model.Books)
         {
             <tr>
-                <td>
-                    @if (book.HasDefaultPhoto)
-                    {
-                        <img
-                            src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.Id })"
-                            alt="Default book image"
-                            style="width:40px; height:40px; object-fit:cover; vertical-align:middle; margin-right:8px;" />
-                    }
-                    @book.Title
+                <td class="thumb-cell">
+                    <img
+                        src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.Id })"
+                        alt="Book cover"
+                        class="media-thumb"
+                        onerror="this.onerror=null;this.src='@Url.Content("~/images/book-fallback.svg")';" />
                 </td>
-                <td>@book.AuthorNames</td>
-                <td>@(string.IsNullOrWhiteSpace(book.Isbn) ? "(none)" : book.Isbn)</td>
-                <td>@book.ConditionName</td>
                 <td>
-                    @if (book.CurrentBorrowerName is null)
+                    <a asp-action="EditBook" asp-route-id="@book.Id">@book.Title</a>
+                </td>
+                <td>
+                    @for (int i = 0; i < book.Authors.Count; i++)
                     {
-                        <text>No</text>
+                        <a asp-action="EditAuthor" asp-route-id="@book.Authors[i].Id">@book.Authors[i].Name</a>@(i < book.Authors.Count - 1 ? ", " : string.Empty)
                     }
-                    else
+                    @if (book.Authors.Count == 0)
                     {
-                        <text>Yes - @book.CurrentBorrowerName (@book.CurrentCheckedOutAtUtc?.ToString("u"))</text>
+                        <text>(unknown)</text>
                     }
                 </td>
                 <td>
-                    <a asp-action="EditBook" asp-route-id="@book.Id">Edit</a>
-                    <form asp-action="DeleteBook" asp-route-id="@book.Id" method="post" style="display:inline">
+                    @if (book.CurrentBorrowerName is not null && book.CurrentBorrowerId is not null)
+                    {
+                        <a asp-action="EditBorrower" asp-route-id="@book.CurrentBorrowerId">@book.CurrentBorrowerName</a>
+                        <br /><small class="muted">@book.CurrentCheckedOutAtUtc?.ToString("u")</small>
+                    }
+                </td>
+                <td>
+                    <form asp-action="DeleteBook" asp-route-id="@book.Id" method="post" class="inline">
                         @Html.AntiForgeryToken()
-                        <button type="submit">Delete</button>
+                        <button type="submit" class="button-danger">Delete</button>
                     </form>
                 </td>
             </tr>
         }
         </tbody>
     </table>
+    </div>
 }
-
-<p>
-    <a asp-action="Index">Back to Admin</a>
-</p>

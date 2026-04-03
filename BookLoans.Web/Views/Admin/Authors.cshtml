@@ -3,23 +3,22 @@
     ViewData["Title"] = "Manage Authors";
 }
 
-<h1>Manage Authors</h1>
-
-<p>
-    <a asp-action="CreateAuthor">Add AuthorEntity</a>
-</p>
-
 @if (TempData["AuthorsError"] is string authorsError)
 {
-    <p>@authorsError</p>
+    <p class="message-error">@authorsError</p>
 }
 
 @if (Model.Authors.Count == 0)
 {
-    <p>No authors have been added yet.</p>
+    <div class="card"><p class="muted">No authors have been added yet.</p></div>
 }
 else
 {
+    <div class="card table-wrap">
+        <div class="card-header">
+            <h1 class="page-title">Manage Authors</h1>
+            <a class="button button-primary" asp-action="CreateAuthor">Add Author</a>
+        </div>
     <table>
         <thead>
             <tr>
@@ -32,21 +31,17 @@ else
         @foreach (AuthorViewModel author in Model.Authors)
         {
             <tr>
-                <td>@author.Name</td>
+                <td><a asp-action="EditAuthor" asp-route-id="@author.Id">@author.Name</a></td>
                 <td>@author.BookCount</td>
                 <td>
-                    <a asp-action="EditAuthor" asp-route-id="@author.Id">Edit</a>
-                    <form asp-action="DeleteAuthor" asp-route-id="@author.Id" method="post" style="display:inline">
+                    <form asp-action="DeleteAuthor" asp-route-id="@author.Id" method="post" class="inline">
                         @Html.AntiForgeryToken()
-                        <button type="submit">Delete</button>
+                        <button type="submit" class="button-danger">Delete</button>
                     </form>
                 </td>
             </tr>
         }
         </tbody>
     </table>
+    </div>
 }
-
-<p>
-    <a asp-action="Index">Back to Admin</a>
-</p>

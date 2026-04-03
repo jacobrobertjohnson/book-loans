@@ -1,23 +1,26 @@
 @model ConditionFormViewModel
 @{
-    ViewData["Title"] = "Edit ConditionEntity";
+    ViewData["Title"] = "Edit Condition";
 }
 
-<h1>Edit ConditionEntity</h1>
+<div class="page-title-row">
+    <a class="back-arrow" asp-action="Conditions" title="Back to Manage Conditions">&#8592;</a>
+    <h1 class="page-title">Edit Condition</h1>
+</div>
 
-<form asp-action="EditCondition" asp-route-id="@Model.Id" method="post">
+<form asp-action="EditCondition" asp-route-id="@Model.Id" method="post" class="form-shell stack">
     @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly"></div>
+    <div asp-validation-summary="ModelOnly" class="message-error"></div>
 
-    <div>
+    <h2>Condition Details</h2>
+
+    <div class="field">
         <label asp-for="Name"></label>
         <input asp-for="Name" />
         <span asp-validation-for="Name"></span>
     </div>
 
-    <button type="submit">Save Changes</button>
+    <div class="actions-row">
+        <button type="submit" class="button-primary">Save Changes</button>
+    </div>
 </form>
-
-<p>
-    <a asp-action="Conditions">Back to Conditions</a>
-</p>

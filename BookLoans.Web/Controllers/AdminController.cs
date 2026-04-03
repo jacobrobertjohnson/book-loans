@@ -15,9 +15,7 @@ public class AdminController(
     IAdminCheckoutService checkoutService) : Controller
 {
     public IActionResult Index()
-    {
-        return View();
-    }
+        => RedirectToAction(nameof(Checkouts));
 
     [HttpGet]
     public async Task<IActionResult> Books(CancellationToken ct)
