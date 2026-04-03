@@ -7,9 +7,7 @@
       "request": "launch",
       "preLaunchTask": "build-solution",
       "program": "${workspaceFolder}/src/BookLoans.Web/bin/Debug/net10.0/BookLoans.Web.dll",
-      "args": [],
       "cwd": "${workspaceFolder}/src/BookLoans.Web",
-      "stopAtEntry": false,
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
