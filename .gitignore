@@ -423,3 +423,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+BookLoans.Web/Data/book-loans.db
