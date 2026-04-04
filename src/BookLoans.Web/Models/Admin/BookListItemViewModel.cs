@@ -11,6 +11,8 @@ public class BookListItemViewModel
 
     public string Title { get; init; } = string.Empty;
 
+    public string? SeriesName { get; init; }
+
     public string AuthorNames { get; init; } = string.Empty;
 
     public string? Isbn { get; init; }

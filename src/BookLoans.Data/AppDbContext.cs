@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 	public DbSet<BorrowerEntity> Borrowers => Set<BorrowerEntity>();
 	public DbSet<BookLoanEntity> BookLoans => Set<BookLoanEntity>();
 	public DbSet<ConditionEntity> Conditions => Set<ConditionEntity>();
+	public DbSet<SeriesEntity> Series => Set<SeriesEntity>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -122,5 +123,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 				new ConditionEntity { Id = 1, Name = "New" },
 				new ConditionEntity { Id = 2, Name = "Used" });
 		});
+
+		modelBuilder.Entity<SeriesEntity>(series =>
+		{
+			series.Property(s => s.Name).IsRequired().HasMaxLength(300);
+			series.HasIndex(s => s.Name).IsUnique();
+		});
+
+		modelBuilder.Entity<BookEntity>()
+			.HasOne(b => b.Series)
+			.WithMany(s => s.Books)
+			.HasForeignKey(b => b.SeriesId)
+			.OnDelete(DeleteBehavior.SetNull);
 	}
 }

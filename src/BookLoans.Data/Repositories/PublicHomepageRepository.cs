@@ -1,3 +1,4 @@
+using BookLoans.Abstractions.Extensions;
 using BookLoans.Abstractions.Models;
 using BookLoans.Abstractions.Interfaces;
 using BookLoans.Data.Entities;
@@ -34,17 +35,18 @@ public class PublicHomepageRepository(AppDbContext dbContext) : IPublicHomepageR
             .OrderBy(group => group.Books.First().CheckedOutAtUtc)
             .ToList();
 
-        List<Book> availableBooks = await dbContext.Books
+        List<Book> availableBooks = (await dbContext.Books
             .AsNoTracking()
             .Include(book => book.Loans)
             .Include(book => book.BookAuthors)
             .ThenInclude(bookAuthor => bookAuthor.AuthorEntity)
+            .Include(book => book.Series)
             .Where(book => !book.Loans.Any(loan => loan.ReturnedAtUtc == null))
-            .OrderBy(book => book.Title)
             .Select(book => new Book
             {
                 Id = book.Id,
                 Title = book.Title,
+                SeriesName = book.Series != null ? book.Series.Name : null,
                 AuthorNames = book.BookAuthors.Count == 0
                     ? "(unknown)"
                     : string.Join(
@@ -53,7 +55,10 @@ public class PublicHomepageRepository(AppDbContext dbContext) : IPublicHomepageR
                             .OrderBy(bookAuthor => bookAuthor.AuthorEntity.Name)
                             .Select(bookAuthor => bookAuthor.AuthorEntity.Name))
             })
-            .ToListAsync(ct);
+            .ToListAsync(ct))
+            .OrderBy(book => (book.SeriesName ?? book.Title).NormalizeForSort())
+            .ThenBy(book => book.Title.NormalizeForSort())
+            .ToList();
 
         return new HomepageData
         {

@@ -38,9 +38,17 @@ public class Book
 
     public bool IsCheckedOut { get; init; }
 
+    public int? SeriesId { get; init; }
+
+    public string? SeriesName { get; init; }
+
+    public string? NewSeriesName { get; init; }
+
     public IReadOnlyList<Author> Authors { get; init; } = [];
 
     public IReadOnlyList<Condition> Conditions { get; init; } = [];
+
+    public IReadOnlyList<Series> SeriesOptions { get; init; } = [];
 
     public BookLoan? CurrentCheckout { get; init; }
 

@@ -17,6 +17,11 @@ public class BookFormViewModel
     [MaxLength(1000)]
     public string? NewAuthorNames { get; init; }
 
+    public int? SeriesId { get; init; }
+
+    [MaxLength(300)]
+    public string? NewSeriesName { get; init; }
+
     [MaxLength(100)]
     public string? Edition { get; init; }
 
@@ -42,6 +47,8 @@ public class BookFormViewModel
 
     public IReadOnlyList<ConditionViewModel> Conditions { get; init; } = [];
 
+    public IReadOnlyList<SeriesViewModel> SeriesOptions { get; init; } = [];
+
     public BookLoanViewModel? CurrentCheckout { get; init; }
 
     public IReadOnlyList<BookLoanViewModel> CheckoutHistory { get; init; } = [];
@@ -64,6 +71,8 @@ public class BookFormViewModel
                 .Distinct()
                 .ToList(),
             NewAuthorNames = NewAuthorNames?.Trim(),
+            SeriesId = SeriesId,
+            NewSeriesName = NewSeriesName?.Trim(),
             Edition = Edition,
             YearFirstPublished = YearFirstPublished,
             YearEditionPublished = YearEditionPublished,
@@ -73,6 +82,7 @@ public class BookFormViewModel
             ConditionId = ConditionId,
             Authors = Authors,
             Conditions = Conditions,
+            SeriesOptions = SeriesOptions,
             CurrentCheckout = CurrentCheckout,
             CheckoutHistory = CheckoutHistory,
             BookPhotos = BookPhotos

@@ -9,6 +9,8 @@ public sealed class AvailableBookViewModel
 
     public string Title { get; init; } = string.Empty;
 
+    public string? SeriesName { get; init; }
+
     public string AuthorNames { get; init; } = string.Empty;
 
     public static AvailableBookViewModel FromDto(Book dto)

@@ -18,10 +18,12 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 			.Include(book => book.Photos)
 			.Include(book => book.BookAuthors)
 			.ThenInclude(bookAuthor => bookAuthor.AuthorEntity)
-			.OrderBy(book => book.Title)
+			.Include(book => book.Series)
 			.ToListAsync(ct);
 
 		return entities
+			.OrderBy(book => (book.Series?.Name ?? book.Title).NormalizeForSort())
+			.ThenBy(book => book.Title.NormalizeForSort())
 			.Select(book => book.ToAdminBookListItemDto())
 			.ToList();
 	}
@@ -30,11 +32,13 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 	{
 		IReadOnlyList<Author> authors = await GetAuthorsAsync(ct);
 		IReadOnlyList<Condition> conditions = await GetConditionsAsync(ct);
+		IReadOnlyList<Series> seriesOptions = await GetSeriesOptionsAsync(ct);
 
 		return new Book
 		{
 			Authors = authors,
 			Conditions = conditions,
+			SeriesOptions = seriesOptions,
 			YearFirstPublished = DateTime.UtcNow.Year,
 			ConditionId = conditions.FirstOrDefault()?.Id ?? 0
 		};
@@ -49,6 +53,7 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 			.Include(entity => entity.Photos)
 			.Include(entity => entity.BookAuthors)
 			.ThenInclude(ba => ba.AuthorEntity)
+			.Include(entity => entity.Series)
 			.FirstOrDefaultAsync(entity => entity.Id == id, ct);
 
 		if (book is null)
@@ -64,6 +69,7 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 				.OrderBy(entity => entity.AuthorEntity.Name)
 				.Select(entity => entity.AuthorId)
 				.ToListAsync(ct),
+			SeriesId = book.SeriesId,
 			Edition = book.Edition,
 			YearFirstPublished = book.YearFirstPublished,
 			YearEditionPublished = book.YearEditionPublished,
@@ -73,6 +79,7 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 			ConditionId = book.ConditionId,
 			Authors = await GetAuthorsAsync(ct),
 			Conditions = await GetConditionsAsync(ct),
+			SeriesOptions = await GetSeriesOptionsAsync(ct),
 			CurrentCheckout = book.Loans
 				.Where(loan => loan.ReturnedAtUtc == null)
 				.OrderByDescending(loan => loan.CheckedOutAtUtc)
@@ -212,8 +219,13 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 		if (authorError is not null)
 			return authorError;
 
+		(int? seriesId, string? seriesError) = await ResolveSeriesIdAsync(model.SeriesId, model.NewSeriesName, ct);
+		if (seriesError is not null)
+			return seriesError;
+
 		BookEntity book = BookEntity.FromFormDto(model);
 		book.Isbn = normalizedIsbn;
+		book.SeriesId = seriesId;
 		dbContext.Books.Add(book);
 
 		foreach (int authorId in authorIds)
@@ -254,6 +266,10 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 		if (authorError is not null)
 			return authorError;
 
+		(int? seriesId, string? seriesError) = await ResolveSeriesIdAsync(model.SeriesId, model.NewSeriesName, ct);
+		if (seriesError is not null)
+			return seriesError;
+
 		book.Title = model.Title;
 		book.Edition = model.Edition;
 		book.YearFirstPublished = model.YearFirstPublished;
@@ -262,6 +278,7 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 		book.DateOfPurchase = model.DateOfPurchase;
 		book.LocationOfPurchase = model.LocationOfPurchase;
 		book.ConditionId = model.ConditionId;
+		book.SeriesId = seriesId;
 
 		List<BookAuthorEntity> existingBookAuthors = await dbContext.BookAuthors
 			.Where(entity => entity.BookId == id)
@@ -330,6 +347,55 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 		return authors
 			.Select(author => author.ToAuthorDto())
 			.ToList();
+	}
+
+	private async Task<IReadOnlyList<Series>> GetSeriesOptionsAsync(CancellationToken ct)
+	{
+		List<SeriesEntity> series = await dbContext.Series
+			.AsNoTracking()
+			.Include(s => s.Books)
+			.OrderBy(s => s.Name)
+			.ToListAsync(ct);
+
+		return series
+			.Select(s => s.ToSeriesDto())
+			.ToList();
+	}
+
+	private async Task<(int? seriesId, string? error)> ResolveSeriesIdAsync(
+		int? selectedSeriesId,
+		string? newSeriesName,
+		CancellationToken ct)
+	{
+		string? normalizedName = newSeriesName?.Trim().NormalizeOrNull();
+
+		if (normalizedName is not null && selectedSeriesId.HasValue)
+			return (null, "Please either select an existing series or enter a new series name, not both.");
+
+		if (normalizedName is not null)
+		{
+			SeriesEntity? existing = await dbContext.Series
+				.FirstOrDefaultAsync(s => s.Name == normalizedName, ct);
+
+			if (existing is not null)
+				return (existing.Id, null);
+
+			SeriesEntity newSeries = new() { Name = normalizedName };
+			dbContext.Series.Add(newSeries);
+			await dbContext.SaveChangesAsync(ct);
+			return (newSeries.Id, null);
+		}
+
+		if (selectedSeriesId.HasValue)
+		{
+			bool exists = await dbContext.Series.AnyAsync(s => s.Id == selectedSeriesId, ct);
+			if (!exists)
+				return (null, "Please select a valid series.");
+
+			return (selectedSeriesId, null);
+		}
+
+		return (null, null);
 	}
 
 	private async Task<(IReadOnlyList<int> authorIds, string? error)> ResolveAuthorIdsAsync(

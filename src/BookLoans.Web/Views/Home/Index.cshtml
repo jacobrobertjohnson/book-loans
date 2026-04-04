@@ -53,6 +53,10 @@ else
                     alt="Book cover"
                     onerror="this.onerror=null;this.src='@Url.Content("~/images/book-fallback.svg")';" />
                 <div class="photo-card-meta">
+                    @if (!string.IsNullOrEmpty(book.SeriesName))
+                    {
+                        <p class="photo-card-caption"><strong>@book.SeriesName</strong></p>
+                    }
                     <p class="photo-card-caption"><strong>@book.Title</strong></p>
                     @if (!string.IsNullOrEmpty(book.AuthorNames))
                     {

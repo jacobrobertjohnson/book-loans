@@ -66,6 +66,25 @@
     </section>
 
     <section class="form-section">
+        <h2>Series</h2>
+        <div class="form-grid">
+            <div class="field">
+                <label asp-for="SeriesId">Existing Series</label>
+                <select asp-for="SeriesId" asp-items="@(new SelectList(Model.SeriesOptions, nameof(SeriesViewModel.Id), nameof(SeriesViewModel.Name), Model.SeriesId))">
+                    <option value="">-- No series --</option>
+                </select>
+                <span asp-validation-for="SeriesId"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="NewSeriesName">Create New Series</label>
+                <input asp-for="NewSeriesName" />
+                <span asp-validation-for="NewSeriesName"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
         <h2>Authors</h2>
         <div class="form-grid">
             <div class="field">

@@ -41,6 +41,10 @@
                         onerror="this.onerror=null;this.src='@Url.Content("~/images/book-fallback.svg")';" />
                 </td>
                 <td>
+                    @if (!string.IsNullOrEmpty(book.SeriesName))
+                    {
+                        <p><strong>@book.SeriesName</strong></p>
+                    }
                     <a asp-action="EditBook" asp-route-id="@book.Id">@book.Title</a>
                 </td>
                 <td>

@@ -75,4 +75,17 @@ public class StringExtensionsTests
         Assert.NotNull(result);
         Assert.Equal("multi  \n  line", result);
     }
+
+    [Theory]
+    [InlineData("Beowulf", "Beowulf")]
+    [InlineData("The Martian", "Martian")]
+    [InlineData("the martian", "martian")]
+    [InlineData("An American Werewolf", "American Werewolf")]
+    [InlineData("A Room with a View", "Room with a View")]
+    [InlineData("Anchor", "Anchor")]
+    [InlineData("There Will Be Blood", "There Will Be Blood")]
+    public void NormalizeForSort_StripsLeadingArticle(string input, string expected)
+    {
+        Assert.Equal(expected, input.NormalizeForSort());
+    }
 }

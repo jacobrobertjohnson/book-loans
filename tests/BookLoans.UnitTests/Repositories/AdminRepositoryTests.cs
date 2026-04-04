@@ -680,4 +680,85 @@ public class PublicHomepageRepositoryTests : IAsyncLifetime
         Assert.Equal("Zebra Tales", result.AvailableBooks[1].Title);
         Assert.Empty(result.BorrowerGroups);
     }
+
+    [Fact]
+    public async Task GetAsync_AvailableBooks_SortsBySeriesOrTitleWithArticleStripping()
+    {
+        var condition = new ConditionEntity { Name = "Good" };
+        await _dbContext.Conditions.AddAsync(condition);
+
+        var narniaSeries = new SeriesEntity { Name = "The Chronicles of Narnia" };
+        var lotrSeries = new SeriesEntity { Name = "Lord of the Rings" };
+        await _dbContext.Series.AddRangeAsync(narniaSeries, lotrSeries);
+        await _dbContext.SaveChangesAsync();
+
+        var beowulf = new BookEntity { Title = "Beowulf", ConditionId = condition.Id };
+        var silverChair = new BookEntity { Title = "The Silver Chair", ConditionId = condition.Id, SeriesId = narniaSeries.Id };
+        var fellowship = new BookEntity { Title = "The Fellowship of the Ring", ConditionId = condition.Id, SeriesId = lotrSeries.Id };
+        var theMartian = new BookEntity { Title = "The Martian", ConditionId = condition.Id };
+        await _dbContext.Books.AddRangeAsync(beowulf, silverChair, fellowship, theMartian);
+        await _dbContext.SaveChangesAsync();
+
+        var repository = new PublicHomepageRepository(_dbContext);
+
+        var result = await repository.GetAsync(CancellationToken.None);
+
+        // Sort keys: "Beowulf", "Chronicles of Narnia", "Lord of the Rings", "Martian"
+        Assert.Equal(4, result.AvailableBooks.Count);
+        Assert.Equal("Beowulf", result.AvailableBooks[0].Title);
+        Assert.Equal("The Silver Chair", result.AvailableBooks[1].Title);
+        Assert.Equal("The Fellowship of the Ring", result.AvailableBooks[2].Title);
+        Assert.Equal("The Martian", result.AvailableBooks[3].Title);
+    }
+}
+
+public class AdminBookRepositoryTests : IAsyncLifetime
+{
+    private DbContextOptions<AppDbContext> _options = null!;
+    private AppDbContext _dbContext = null!;
+
+    public async Task InitializeAsync()
+    {
+        _options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        _dbContext = new AppDbContext(_options);
+        await _dbContext.Database.EnsureCreatedAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task GetBooksAsync_SortsBySeriesOrTitleWithArticleStripping()
+    {
+        var condition = new ConditionEntity { Name = "Good" };
+        await _dbContext.Conditions.AddAsync(condition);
+
+        var narniaSeries = new SeriesEntity { Name = "The Chronicles of Narnia" };
+        var lotrSeries = new SeriesEntity { Name = "Lord of the Rings" };
+        await _dbContext.Series.AddRangeAsync(narniaSeries, lotrSeries);
+        await _dbContext.SaveChangesAsync();
+
+        var beowulf = new BookEntity { Title = "Beowulf", ConditionId = condition.Id };
+        var silverChair = new BookEntity { Title = "The Silver Chair", ConditionId = condition.Id, SeriesId = narniaSeries.Id };
+        var fellowship = new BookEntity { Title = "The Fellowship of the Ring", ConditionId = condition.Id, SeriesId = lotrSeries.Id };
+        var theMartian = new BookEntity { Title = "The Martian", ConditionId = condition.Id };
+        await _dbContext.Books.AddRangeAsync(beowulf, silverChair, fellowship, theMartian);
+        await _dbContext.SaveChangesAsync();
+
+        var repository = new AdminBookRepository(_dbContext);
+
+        var result = await repository.GetBooksAsync(CancellationToken.None);
+
+        // Sort keys: "Beowulf", "Chronicles of Narnia", "Lord of the Rings", "Martian"
+        Assert.Equal(4, result.Count);
+        Assert.Equal("Beowulf", result[0].Title);
+        Assert.Equal("The Silver Chair", result[1].Title);
+        Assert.Equal("The Fellowship of the Ring", result[2].Title);
+        Assert.Equal("The Martian", result[3].Title);
+    }
 }
