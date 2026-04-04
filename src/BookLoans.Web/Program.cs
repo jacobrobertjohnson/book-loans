@@ -60,6 +60,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 WebApplication app = builder.Build();
 
+await MigrateDatabaseAsync(app.Services);
 await SeedAdminUserAsync(app.Services, app.Configuration);
 
 // Configure the HTTP request pipeline.
@@ -85,6 +86,13 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+static async Task MigrateDatabaseAsync(IServiceProvider services)
+{
+    using IServiceScope scope = services.CreateScope();
+    AppDbContext dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 static async Task SeedAdminUserAsync(IServiceProvider services, IConfiguration configuration)
 {
