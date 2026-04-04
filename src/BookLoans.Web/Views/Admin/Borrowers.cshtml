@@ -8,17 +8,17 @@
     <p class="message-error">@borrowersError</p>
 }
 
-@if (Model.Borrowers.Count == 0)
-{
-    <div class="card"><p class="muted">No borrowers have been added yet.</p></div>
-}
-else
-{
-    <div class="card table-wrap">
-        <div class="card-header">
-            <h1 class="page-title">Manage Borrowers</h1>
-            <a class="button button-primary" asp-action="CreateBorrower">Add Borrower</a>
-        </div>
+<div class="card table-wrap">
+    <div class="card-header">
+        <h1 class="page-title">Manage Borrowers</h1>
+        <a class="button button-primary" asp-action="CreateBorrower">Add Borrower</a>
+    </div>
+    @if (Model.Borrowers.Count == 0)
+    {
+        <p class="muted">No borrowers have been added yet.</p>
+    }
+    else
+    {
     <table>
         <thead>
             <tr>
@@ -45,5 +45,5 @@ else
         }
         </tbody>
     </table>
-    </div>
-}
+    }
+</div>
