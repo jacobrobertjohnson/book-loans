@@ -504,6 +504,10 @@ td.thumb-cell {
     color: var(--ink-soft);
 }
 
+.is-hidden {
+    display: none !important;
+}
+
 .borrower-heading {
     margin: 24px 0 10px;
     font-size: 1.15rem;
@@ -514,9 +518,26 @@ td.thumb-cell {
     margin-top: 8px;
 }
 
+.home-search-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 10px 0 14px;
+}
+
+.home-search-input {
+    flex: 1;
+    min-width: 220px;
+}
+
 @media (max-width: 860px) {
     .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .home-search-controls {
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .header-inner {
