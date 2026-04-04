@@ -66,3 +66,6 @@ description: "Repository-wide coding style and architecture preferences for Book
 ## Repo-specific Notes
 - The SQLite file path is configured in appsettings.json.
 - The current baseline DB should start with no application tables until entities are added.
+- AI QA documentation:
+  - Playbook: `docs/qa/ai-test-playbook.md`
+  - Run log: `docs/qa/run-log.md`
