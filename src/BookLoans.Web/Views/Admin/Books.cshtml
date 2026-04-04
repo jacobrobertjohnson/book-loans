@@ -43,7 +43,7 @@
                 <td>
                     @if (!string.IsNullOrEmpty(book.SeriesName))
                     {
-                        <p><strong>@book.SeriesName</strong></p>
+                        <p class="book-series"><strong>@book.SeriesName</strong></p>
                     }
                     <a asp-action="EditBook" asp-route-id="@book.Id">@book.Title</a>
                 </td>

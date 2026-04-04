@@ -32,6 +32,10 @@ a:hover {
     text-decoration: underline;
 }
 
+.book-series {
+    margin: 0;
+}
+
 .app-header {
     background: linear-gradient(120deg, #12343b 0%, #1d4d57 50%, #2b6672 100%);
     color: #f5fbfd;
@@ -450,6 +454,10 @@ td.thumb-cell {
 .photo-card-caption {
     min-height: 2.6em;
     line-height: 1.3;
+}
+
+.photo-card-series {
+    min-height: 0;
 }
 
 .photo-card-actions {
