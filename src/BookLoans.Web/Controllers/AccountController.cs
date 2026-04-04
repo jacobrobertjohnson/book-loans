@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BookLoans.Web.Controllers;
 
-public class AccountController(SignInManager<ApplicationUserEntity> signInManager) : Controller
+public class AccountController(
+    SignInManager<ApplicationUserEntity> signInManager,
+    UserManager<ApplicationUserEntity> userManager) : Controller
 {
     [AllowAnonymous]
     [HttpGet]
@@ -52,5 +54,34 @@ public class AccountController(SignInManager<ApplicationUserEntity> signInManage
     {
         await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
+    }
+
+    [Authorize]
+    [HttpGet]
+    public IActionResult ChangePassword()
+        => View(new ChangePasswordViewModel());
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        ApplicationUserEntity? user = await userManager.GetUserAsync(User);
+        if (user is null)
+            return RedirectToAction(nameof(Login));
+
+        IdentityResult result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            foreach (IdentityError error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+            return View(model);
+        }
+
+        await signInManager.RefreshSignInAsync(user);
+        return RedirectToAction("Index", "Admin");
     }
 }

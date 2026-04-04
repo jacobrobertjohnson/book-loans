@@ -39,6 +39,7 @@
                 {
                     <a asp-controller="Home" asp-action="Index">Home</a>
                     <a asp-controller="Admin" asp-action="Index">Admin</a>
+                    <a asp-controller="Account" asp-action="ChangePassword">Change Password</a>
                     <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
                         @Html.AntiForgeryToken()
                         <button type="submit">Log out</button>
