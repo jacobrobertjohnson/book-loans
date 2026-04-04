@@ -318,6 +318,21 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 		if (book is null)
 			return "BookEntity not found.";
 
+		List<BookLoanEntity> loans = await dbContext.BookLoans
+			.Where(entity => entity.BookId == id)
+			.ToListAsync(ct);
+		dbContext.BookLoans.RemoveRange(loans);
+
+		List<BookAuthorEntity> bookAuthors = await dbContext.BookAuthors
+			.Where(entity => entity.BookId == id)
+			.ToListAsync(ct);
+		dbContext.BookAuthors.RemoveRange(bookAuthors);
+
+		List<BookPhotoEntity> photos = await dbContext.BookPhotos
+			.Where(entity => entity.BookId == id)
+			.ToListAsync(ct);
+		dbContext.BookPhotos.RemoveRange(photos);
+
 		dbContext.Books.Remove(book);
 		await dbContext.SaveChangesAsync(ct);
 		return null;

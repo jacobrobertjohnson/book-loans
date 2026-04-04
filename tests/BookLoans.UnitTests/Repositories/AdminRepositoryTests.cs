@@ -761,4 +761,36 @@ public class AdminBookRepositoryTests : IAsyncLifetime
         Assert.Equal("The Fellowship of the Ring", result[2].Title);
         Assert.Equal("The Martian", result[3].Title);
     }
+
+    [Fact]
+    public async Task DeleteAsync_WithCheckoutHistory_RemovesBookAndLoans()
+    {
+        var condition = new ConditionEntity { Name = "Good" };
+        var borrower = new BorrowerEntity { FirstName = "Test", LastName = "Borrower" };
+        await _dbContext.Conditions.AddAsync(condition);
+        await _dbContext.Borrowers.AddAsync(borrower);
+        await _dbContext.SaveChangesAsync();
+
+        var book = new BookEntity { Title = "Delete Me", ConditionId = condition.Id };
+        await _dbContext.Books.AddAsync(book);
+        await _dbContext.SaveChangesAsync();
+
+        var loan = new BookLoanEntity
+        {
+            BookId = book.Id,
+            BorrowerId = borrower.Id,
+            CheckedOutAtUtc = DateTime.UtcNow.AddDays(-3),
+            ReturnedAtUtc = DateTime.UtcNow.AddDays(-1)
+        };
+        await _dbContext.BookLoans.AddAsync(loan);
+        await _dbContext.SaveChangesAsync();
+
+        var repository = new AdminBookRepository(_dbContext);
+
+        var result = await repository.DeleteAsync(book.Id, CancellationToken.None);
+
+        Assert.Null(result);
+        Assert.False(await _dbContext.Books.AnyAsync(entity => entity.Id == book.Id));
+        Assert.False(await _dbContext.BookLoans.AnyAsync(entity => entity.BookId == book.Id));
+    }
 }
