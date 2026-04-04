@@ -8,17 +8,17 @@
     <p class="message-error">@booksError</p>
 }
 
-@if (Model.Books.Count == 0)
-{
-    <div class="card"><p class="muted">No books have been added yet.</p></div>
-}
-else
-{
-    <div class="card table-wrap">
-        <div class="card-header">
-            <h1 class="page-title">Manage Books</h1>
-            <a class="button button-primary" asp-action="CreateBook">Add Book</a>
-        </div>
+<div class="card table-wrap">
+    <div class="card-header">
+        <h1 class="page-title">Manage Books</h1>
+        <a class="button button-primary" asp-action="CreateBook">Add Book</a>
+    </div>
+    @if (Model.Books.Count == 0)
+    {
+        <p class="muted">No books have been added yet.</p>
+    }
+    else
+    {
     <table>
         <thead>
             <tr>
@@ -70,5 +70,5 @@ else
         }
         </tbody>
     </table>
-    </div>
-}
+    }
+</div>
