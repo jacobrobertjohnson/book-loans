@@ -5,6 +5,16 @@
 
 <h1 class="page-title">Currently Checked Out</h1>
 
+<div class="home-search-controls">
+    <input
+        id="homeSearch"
+        class="home-search-input"
+        type="search"
+        placeholder="Search by borrower, title, author, series, or date"
+        aria-label="Search checked out and available books" />
+    <button id="clearHomeSearch" type="button" class="button is-hidden">Clear</button>
+</div>
+
 @if (Model.BorrowerGroups.Count == 0)
 {
     <p class="muted">No books are currently checked out.</p>
@@ -13,11 +23,12 @@ else
 {
     @foreach (BorrowerCheckoutGroupViewModel borrowerGroup in Model.BorrowerGroups)
     {
+        <section data-filter-group data-borrower="@borrowerGroup.BorrowerFullName">
         <h2 class="borrower-heading">@borrowerGroup.BorrowerFullName</h2>
-        <ul class="photo-grid">
+        <ul class="photo-grid" data-filter-grid>
             @foreach (BookLoanViewModel loan in borrowerGroup.Books)
             {
-                <li class="photo-card">
+                <li class="photo-card" data-filter-tile data-borrower="@borrowerGroup.BorrowerFullName">
                     <img
                         src="@Url.Action("BookDefaultPhoto", "Admin", new { id = loan.BookId })"
                         alt="Book cover"
@@ -33,10 +44,12 @@ else
                 </li>
             }
         </ul>
+        </section>
     }
 }
 
-<h2 class="borrower-heading">Available Books</h2>
+<section data-filter-group>
+    <h2 class="borrower-heading">Available Books</h2>
 
 @if (Model.AvailableBooks.Count == 0)
 {
@@ -44,10 +57,10 @@ else
 }
 else
 {
-    <ul class="photo-grid">
+    <ul class="photo-grid" data-filter-grid>
         @foreach (AvailableBookViewModel book in Model.AvailableBooks)
         {
-            <li class="photo-card">
+            <li class="photo-card" data-filter-tile>
                 <img
                     src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.Id })"
                     alt="Book cover"
@@ -67,3 +80,64 @@ else
         }
     </ul>
 }
+</section>
+
+<script>
+    (() => {
+        const normalize = (value) => (value || "").trim().toLowerCase();
+
+        const input = document.getElementById("homeSearch");
+        const clearButton = document.getElementById("clearHomeSearch");
+        const tiles = Array.from(document.querySelectorAll("[data-filter-tile]"));
+        const groups = Array.from(document.querySelectorAll("[data-filter-group]"));
+
+        if (!input || !clearButton || tiles.length === 0)
+            return;
+
+        for (const tile of tiles) {
+            const borrower = tile.getAttribute("data-borrower") || "";
+            tile.dataset.searchText = normalize(`${tile.textContent || ""} ${borrower}`);
+        }
+
+        const applyFilter = () => {
+            const term = normalize(input.value);
+            clearButton.classList.toggle("is-hidden", term.length === 0);
+
+            for (const group of groups) {
+                const groupTiles = Array.from(group.querySelectorAll("[data-filter-tile]"));
+                if (groupTiles.length === 0)
+                    continue;
+
+                const groupBorrower = normalize(group.getAttribute("data-borrower") || "");
+                const borrowerMatched = term.length > 0 && groupBorrower.includes(term);
+
+                for (const tile of groupTiles) {
+                    if (term.length === 0) {
+                        tile.classList.remove("is-hidden");
+                        continue;
+                    }
+
+                    if (borrowerMatched) {
+                        tile.classList.remove("is-hidden");
+                        continue;
+                    }
+
+                    const searchable = tile.dataset.searchText || "";
+                    tile.classList.toggle("is-hidden", !searchable.includes(term));
+                }
+
+                const hasVisibleTile = groupTiles.some((tile) => !tile.classList.contains("is-hidden"));
+                group.classList.toggle("is-hidden", !hasVisibleTile);
+            }
+        };
+
+        input.addEventListener("input", applyFilter);
+        clearButton.addEventListener("click", () => {
+            input.value = "";
+            applyFilter();
+            input.focus();
+        });
+
+        applyFilter();
+    })();
+</script>
