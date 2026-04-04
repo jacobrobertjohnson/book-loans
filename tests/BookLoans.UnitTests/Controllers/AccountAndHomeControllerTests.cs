@@ -21,13 +21,16 @@ public class HomeControllerTests
     public async Task Index_CallsQueryService()
     {
         var mockService = new Mock<IPublicHomepageQueryService>();
-        var groups = new List<BorrowerCheckoutGroup>
+        var homepageData = new HomepageData
         {
-            new() { BorrowerFullName = "John Doe", Books = new List<BookLoan>() }
+            BorrowerGroups = new List<BorrowerCheckoutGroup>
+            {
+                new() { BorrowerFullName = "John Doe", Books = new List<BookLoan>() }
+            }
         };
         mockService
             .Setup(s => s.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(groups);
+            .ReturnsAsync(homepageData);
         var controller = new HomeController(mockService.Object);
 
         var result = await controller.Index(CancellationToken.None);
@@ -42,7 +45,7 @@ public class HomeControllerTests
         var mockService = new Mock<IPublicHomepageQueryService>();
         mockService
             .Setup(s => s.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<BorrowerCheckoutGroup>());
+            .ReturnsAsync(new HomepageData());
         var controller = new HomeController(mockService.Object);
 
         var result = await controller.Index(CancellationToken.None);
@@ -55,13 +58,16 @@ public class HomeControllerTests
     public async Task Index_WithCheckouts_PassesModelToView()
     {
         var mockService = new Mock<IPublicHomepageQueryService>();
-        var groups = new List<BorrowerCheckoutGroup>
+        var homepageData = new HomepageData
         {
-            new() { BorrowerFullName = "John Doe", Books = new List<BookLoan>() }
+            BorrowerGroups = new List<BorrowerCheckoutGroup>
+            {
+                new() { BorrowerFullName = "John Doe", Books = new List<BookLoan>() }
+            }
         };
         mockService
             .Setup(s => s.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(groups);
+            .ReturnsAsync(homepageData);
         var controller = new HomeController(mockService.Object);
 
         var result = await controller.Index(CancellationToken.None);

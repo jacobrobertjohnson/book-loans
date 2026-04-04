@@ -7,9 +7,19 @@ public sealed class HomepageViewModel
 {
     public IReadOnlyList<BorrowerCheckoutGroupViewModel> BorrowerGroups { get; init; } = [];
 
-    public static HomepageViewModel FromDtos(IReadOnlyList<BorrowerCheckoutGroup> dtos)
-        => new() { BorrowerGroups = dtos.Adapt<List<BorrowerCheckoutGroupViewModel>>() };
+    public IReadOnlyList<AvailableBookViewModel> AvailableBooks { get; init; } = [];
 
-    public IReadOnlyList<BorrowerCheckoutGroup> ToDtos()
-        => BorrowerGroups.Adapt<List<BorrowerCheckoutGroup>>();
+    public static HomepageViewModel FromDto(HomepageData dto)
+        => new()
+        {
+            BorrowerGroups = dto.BorrowerGroups.Adapt<List<BorrowerCheckoutGroupViewModel>>(),
+            AvailableBooks = dto.AvailableBooks.Adapt<List<AvailableBookViewModel>>()
+        };
+
+    public HomepageData ToDto()
+        => new()
+        {
+            BorrowerGroups = BorrowerGroups.Adapt<List<BorrowerCheckoutGroup>>(),
+            AvailableBooks = AvailableBooks.Adapt<List<Book>>()
+        };
 }

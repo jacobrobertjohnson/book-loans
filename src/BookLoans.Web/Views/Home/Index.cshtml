@@ -35,3 +35,31 @@ else
         </ul>
     }
 }
+
+<h2 class="borrower-heading">Available Books</h2>
+
+@if (Model.AvailableBooks.Count == 0)
+{
+    <p class="muted">No books are currently available.</p>
+}
+else
+{
+    <ul class="photo-grid">
+        @foreach (AvailableBookViewModel book in Model.AvailableBooks)
+        {
+            <li class="photo-card">
+                <img
+                    src="@Url.Action("BookDefaultPhoto", "Admin", new { id = book.Id })"
+                    alt="Book cover"
+                    onerror="this.onerror=null;this.src='@Url.Content("~/images/book-fallback.svg")';" />
+                <div class="photo-card-meta">
+                    <p class="photo-card-caption"><strong>@book.Title</strong></p>
+                    @if (!string.IsNullOrEmpty(book.AuthorNames))
+                    {
+                        <p class="muted photo-card-date">@book.AuthorNames</p>
+                    }
+                </div>
+            </li>
+        }
+    </ul>
+}

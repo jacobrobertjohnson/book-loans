@@ -9,7 +9,7 @@ public class HomeController(IPublicHomepageQueryService queryService) : Controll
 {
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        HomepageViewModel viewModel = HomepageViewModel.FromDtos(await queryService.GetAsync(ct));
+        HomepageViewModel viewModel = HomepageViewModel.FromDto(await queryService.GetAsync(ct));
         return View(viewModel);
     }
 

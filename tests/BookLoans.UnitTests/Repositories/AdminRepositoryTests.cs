@@ -547,7 +547,8 @@ public class PublicHomepageRepositoryTests : IAsyncLifetime
 
         var result = await repository.GetAsync(CancellationToken.None);
 
-        Assert.Empty(result);
+        Assert.Empty(result.BorrowerGroups);
+        Assert.Empty(result.AvailableBooks);
     }
 
     [Fact]
@@ -575,7 +576,9 @@ public class PublicHomepageRepositoryTests : IAsyncLifetime
 
         var result = await repository.GetAsync(CancellationToken.None);
 
-        Assert.Empty(result);
+        Assert.Empty(result.BorrowerGroups);
+        Assert.Single(result.AvailableBooks);
+        Assert.Equal("Book", result.AvailableBooks[0].Title);
     }
 
     [Fact]
@@ -599,9 +602,10 @@ public class PublicHomepageRepositoryTests : IAsyncLifetime
 
         var result = await repository.GetAsync(CancellationToken.None);
 
-        Assert.Single(result);
-        Assert.Equal("John Doe", result[0].BorrowerFullName);
-        Assert.Equal(2, result[0].Books.Count);
+        Assert.Single(result.BorrowerGroups);
+        Assert.Equal("John Doe", result.BorrowerGroups[0].BorrowerFullName);
+        Assert.Equal(2, result.BorrowerGroups[0].Books.Count);
+        Assert.Empty(result.AvailableBooks);
     }
 
     [Fact]
@@ -626,7 +630,8 @@ public class PublicHomepageRepositoryTests : IAsyncLifetime
 
         var result = await repository.GetAsync(CancellationToken.None);
 
-        Assert.Equal(2, result.Count);
+        Assert.Equal(2, result.BorrowerGroups.Count);
+        Assert.Empty(result.AvailableBooks);
     }
 
     [Fact]
@@ -651,8 +656,28 @@ public class PublicHomepageRepositoryTests : IAsyncLifetime
 
         var result = await repository.GetAsync(CancellationToken.None);
 
-        Assert.Single(result);
-        Assert.Equal(2, result[0].Books.Count);
-        Assert.True(result[0].Books[0].CheckedOutAtUtc <= result[0].Books[1].CheckedOutAtUtc);
+        Assert.Single(result.BorrowerGroups);
+        Assert.Equal(2, result.BorrowerGroups[0].Books.Count);
+        Assert.True(result.BorrowerGroups[0].Books[0].CheckedOutAtUtc <= result.BorrowerGroups[0].Books[1].CheckedOutAtUtc);
+    }
+
+    [Fact]
+    public async Task GetAsync_ReturnsAvailableBooksOrderedByTitle()
+    {
+        var condition = new ConditionEntity { Name = "Good" };
+        await _dbContext.Conditions.AddAsync(condition);
+        var zebraBook = new BookEntity { Title = "Zebra Tales", ConditionId = condition.Id };
+        var alphaBook = new BookEntity { Title = "Alpha Guide", ConditionId = condition.Id };
+        await _dbContext.Books.AddRangeAsync(zebraBook, alphaBook);
+        await _dbContext.SaveChangesAsync();
+
+        var repository = new PublicHomepageRepository(_dbContext);
+
+        var result = await repository.GetAsync(CancellationToken.None);
+
+        Assert.Equal(2, result.AvailableBooks.Count);
+        Assert.Equal("Alpha Guide", result.AvailableBooks[0].Title);
+        Assert.Equal("Zebra Tales", result.AvailableBooks[1].Title);
+        Assert.Empty(result.BorrowerGroups);
     }
 }

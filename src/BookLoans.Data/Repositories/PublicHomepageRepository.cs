@@ -7,7 +7,7 @@ namespace BookLoans.Data.Repositories;
 
 public class PublicHomepageRepository(AppDbContext dbContext) : IPublicHomepageRepository
 {
-    public async Task<IReadOnlyList<BorrowerCheckoutGroup>> GetAsync(CancellationToken ct)
+    public async Task<HomepageData> GetAsync(CancellationToken ct)
     {
         List<BookLoanEntity> activeCheckouts = await dbContext.BookLoans
             .AsNoTracking()
@@ -34,6 +34,31 @@ public class PublicHomepageRepository(AppDbContext dbContext) : IPublicHomepageR
             .OrderBy(group => group.Books.First().CheckedOutAtUtc)
             .ToList();
 
-        return groups;
+        List<Book> availableBooks = await dbContext.Books
+            .AsNoTracking()
+            .Include(book => book.Loans)
+            .Include(book => book.BookAuthors)
+            .ThenInclude(bookAuthor => bookAuthor.AuthorEntity)
+            .Where(book => !book.Loans.Any(loan => loan.ReturnedAtUtc == null))
+            .OrderBy(book => book.Title)
+            .Select(book => new Book
+            {
+                Id = book.Id,
+                Title = book.Title,
+                AuthorNames = book.BookAuthors.Count == 0
+                    ? "(unknown)"
+                    : string.Join(
+                        ", ",
+                        book.BookAuthors
+                            .OrderBy(bookAuthor => bookAuthor.AuthorEntity.Name)
+                            .Select(bookAuthor => bookAuthor.AuthorEntity.Name))
+            })
+            .ToListAsync(ct);
+
+        return new HomepageData
+        {
+            BorrowerGroups = groups,
+            AvailableBooks = availableBooks
+        };
     }
 }

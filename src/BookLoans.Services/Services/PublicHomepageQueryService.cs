@@ -5,6 +5,6 @@ namespace BookLoans.Services;
 
 public class PublicHomepageQueryService(IPublicHomepageRepository repository) : IPublicHomepageQueryService
 {
-    public Task<IReadOnlyList<BorrowerCheckoutGroup>> GetAsync(CancellationToken ct)
+    public Task<HomepageData> GetAsync(CancellationToken ct)
         => repository.GetAsync(ct);
 }

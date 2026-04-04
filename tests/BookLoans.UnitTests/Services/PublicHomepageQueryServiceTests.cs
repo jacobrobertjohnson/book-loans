@@ -16,39 +16,42 @@ public class PublicHomepageQueryServiceTests
     public async Task GetAsync_CallsRepositoryGetAsync()
     {
         var mockRepository = new Mock<IPublicHomepageRepository>();
-        var expectedGroups = new List<BorrowerCheckoutGroup>();
+        var expectedData = new HomepageData();
         mockRepository
             .Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedGroups);
+            .ReturnsAsync(expectedData);
         var service = new PublicHomepageQueryService(mockRepository.Object);
 
         var result = await service.GetAsync(CancellationToken.None);
 
         mockRepository.Verify(r => r.GetAsync(It.IsAny<CancellationToken>()), Times.Once);
-        Assert.Same(expectedGroups, result);
+        Assert.Same(expectedData, result);
     }
 
     [Fact]
     public async Task GetAsync_ReturnsRepositoryResult()
     {
         var mockRepository = new Mock<IPublicHomepageRepository>();
-        var expectedGroups = new List<BorrowerCheckoutGroup>
+        var expectedData = new HomepageData
         {
-            new()
+            BorrowerGroups = new List<BorrowerCheckoutGroup>
             {
-                BorrowerFullName = "John Doe",
-                Books = new List<BookLoan>()
+                new()
+                {
+                    BorrowerFullName = "John Doe",
+                    Books = new List<BookLoan>()
+                }
             }
         };
         mockRepository
             .Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedGroups);
+            .ReturnsAsync(expectedData);
         var service = new PublicHomepageQueryService(mockRepository.Object);
 
         var result = await service.GetAsync(CancellationToken.None);
 
-        Assert.Single(result);
-        Assert.Equal("John Doe", result[0].BorrowerFullName);
+        Assert.Single(result.BorrowerGroups);
+        Assert.Equal("John Doe", result.BorrowerGroups[0].BorrowerFullName);
     }
 
     [Fact]
@@ -57,7 +60,7 @@ public class PublicHomepageQueryServiceTests
         var mockRepository = new Mock<IPublicHomepageRepository>();
         mockRepository
             .Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<BorrowerCheckoutGroup>());
+            .ReturnsAsync(new HomepageData());
         var service = new PublicHomepageQueryService(mockRepository.Object);
         var ct = new CancellationToken();
 
@@ -72,31 +75,34 @@ public class PublicHomepageQueryServiceTests
         var mockRepository = new Mock<IPublicHomepageRepository>();
         mockRepository
             .Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<BorrowerCheckoutGroup>());
+            .ReturnsAsync(new HomepageData());
         var service = new PublicHomepageQueryService(mockRepository.Object);
 
         var result = await service.GetAsync(CancellationToken.None);
 
-        Assert.Empty(result);
+        Assert.Empty(result.BorrowerGroups);
     }
 
     [Fact]
     public async Task GetAsync_WithMultipleGroups_ReturnsAllGroups()
     {
         var mockRepository = new Mock<IPublicHomepageRepository>();
-        var expectedGroups = new List<BorrowerCheckoutGroup>
+        var expectedData = new HomepageData
         {
-            new() { BorrowerFullName = "Alice" },
-            new() { BorrowerFullName = "Bob" },
-            new() { BorrowerFullName = "Charlie" }
+            BorrowerGroups = new List<BorrowerCheckoutGroup>
+            {
+                new() { BorrowerFullName = "Alice" },
+                new() { BorrowerFullName = "Bob" },
+                new() { BorrowerFullName = "Charlie" }
+            }
         };
         mockRepository
             .Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedGroups);
+            .ReturnsAsync(expectedData);
         var service = new PublicHomepageQueryService(mockRepository.Object);
 
         var result = await service.GetAsync(CancellationToken.None);
 
-        Assert.Equal(3, result.Count);
+        Assert.Equal(3, result.BorrowerGroups.Count);
     }
 }
