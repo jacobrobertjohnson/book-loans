@@ -4,10 +4,15 @@
 Use this document as the canonical, repeatable QA plan for BookLoans.
 
 ## Scope
-- UI smoke checks for Home and Admin pages.
-- Authenticated Admin workflows.
-- Regression checks for known bugs.
+- Manual UI smoke checks for Home and Admin pages.
+- Manual authenticated Admin workflows.
+- Manual regression checks for known bugs.
 - Deterministic creation and cleanup of QA data.
+
+## Execution Mode
+- This playbook is for manual QA execution in the integrated browser.
+- Do not substitute unit tests for these checks.
+- Do not treat scripted API-only checks as a full replacement for these manual UI steps.
 
 ## Preconditions
 - App runs at `http://localhost:5171`.
@@ -46,6 +51,7 @@ id: QA-CASE-XXX
 name: Short descriptive name
 suite: smoke|regression|admin-e2e|auth
 risk: low|medium|high
+mode: manual
 preconditions:
   - condition
 steps:
@@ -90,6 +96,18 @@ notes:
 - Book list sort rule:
   - series name (if present) first, otherwise title
   - ignore leading `a`, `an`, `the`
+
+### 5) Photo Management Regression Suite
+- Create a QA book (or reuse one created in the same run).
+- Open `Admin/EditBook/{id}` for the QA book.
+- Upload two photos with distinct captions.
+- Verify the first uploaded photo is default in the Photos section.
+- Change default to the other photo using the "Set default" action.
+- Verify the default indicator changes immediately in `Edit Book`.
+- Navigate to Home and verify the same book tile uses the newly selected default photo.
+- Delete all photos for that book from `Edit Book`.
+- Return to Home and verify the tile uses the fallback icon when no photos exist.
+- Confirm `404` responses for `Admin/BookDefaultPhoto/{id}` in this case are expected noise (fallback path), not failures.
 
 ## Agent Prompt (Reusable)
 Use this prompt for repeat QA runs:
