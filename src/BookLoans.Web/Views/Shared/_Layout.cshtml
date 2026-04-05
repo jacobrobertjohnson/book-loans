@@ -14,7 +14,7 @@
         string title = ViewData["Title"]?.ToString() ?? action;
 
         string? parentAction = action switch {
-            var a when a.StartsWith("EditBook") || a.StartsWith("CreateBook") => "Books",
+            var a when a.StartsWith("EditBook") || a.StartsWith("CreateBook") || a.StartsWith("BulkImportBooks") => "Books",
             var a when a.StartsWith("EditBorrower") || a.StartsWith("CreateBorrower") => "Borrowers",
             var a when a.StartsWith("EditAuthor") || a.StartsWith("CreateAuthor") => "Authors",
             var a when a.StartsWith("EditCondition") || a.StartsWith("CreateCondition") => "Conditions",

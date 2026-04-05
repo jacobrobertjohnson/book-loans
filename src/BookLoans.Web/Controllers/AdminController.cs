@@ -3,6 +3,7 @@ using BookLoans.Abstractions.Interfaces;
 using BookLoans.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace BookLoans.Web.Controllers;
 
@@ -190,6 +191,35 @@ public class AdminController(
         }
 
         return RedirectToAction(nameof(EditBook), new { id });
+    }
+
+    [HttpGet]
+    public IActionResult BulkImportBooksTemplate()
+    {
+        string csv = "Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series";
+        return File(Encoding.UTF8.GetBytes(csv), "text/csv", "books-import-template.csv");
+    }
+
+    [HttpGet]
+    public IActionResult BulkImportBooks()
+        => View(new BookImportViewModel());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BulkImportBooks(IFormFile? csvFile, CancellationToken ct)
+    {
+        if (csvFile is null)
+        {
+            ModelState.AddModelError(string.Empty, "Please select a CSV file to import.");
+            return View(new BookImportViewModel());
+        }
+
+        await using MemoryStream stream = new();
+        await csvFile.CopyToAsync(stream, ct);
+        stream.Seek(0, SeekOrigin.Begin);
+
+        BookImportResult result = await bookService.ImportBooksFromCsvAsync(stream, ct);
+        return View(new BookImportViewModel { ImportResult = result });
     }
 
     [HttpGet]

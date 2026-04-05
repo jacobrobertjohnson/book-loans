@@ -2,6 +2,7 @@ namespace BookLoans.UnitTests.Services;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using BookLoans.Abstractions.Models;
@@ -321,5 +322,22 @@ public class AdminBookServiceTests
         var result = await service.GetEditFormAsync(1, CancellationToken.None);
 
         Assert.Same(expectedBook, result);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_DelegatesToRepository()
+    {
+        var mockRepository = new Mock<IAdminBookRepository>();
+        var expectedResult = new BookImportResult { SuccessCount = 3 };
+        mockRepository
+            .Setup(r => r.ImportBooksFromCsvAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResult);
+        var service = new AdminBookService(mockRepository.Object);
+        using var stream = new MemoryStream();
+
+        var result = await service.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        mockRepository.Verify(r => r.ImportBooksFromCsvAsync(stream, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Same(expectedResult, result);
     }
 }

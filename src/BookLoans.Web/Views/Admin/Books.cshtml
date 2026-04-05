@@ -12,6 +12,7 @@
     <div class="card-header">
         <h1 class="page-title">Manage Books</h1>
         <a class="button button-primary" asp-action="CreateBook">Add Book</a>
+        <a class="button" asp-action="BulkImportBooks">Import Books</a>
     </div>
     @if (Model.Books.Count == 0)
     {

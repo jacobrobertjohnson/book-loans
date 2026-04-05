@@ -37,4 +37,7 @@ public class AdminBookService(IAdminBookRepository repository) : IAdminBookServi
 
     public Task<string?> DeleteAsync(int id, CancellationToken ct)
         => repository.DeleteAsync(id, ct);
+
+    public Task<BookImportResult> ImportBooksFromCsvAsync(Stream stream, CancellationToken ct)
+        => repository.ImportBooksFromCsvAsync(stream, ct);
 }
