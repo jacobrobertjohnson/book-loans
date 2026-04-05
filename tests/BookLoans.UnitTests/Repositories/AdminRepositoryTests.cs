@@ -947,6 +947,59 @@ public class AdminBookRepositoryTests : IAsyncLifetime
         Assert.Empty(result.Errors);
     }
 
+    [Fact]
+    public async Task ExportBooksToCsvAsync_WithNoBooks_ReturnsHeaderOnly()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+
+        var result = await repository.ExportBooksToCsvAsync(CancellationToken.None);
+
+        Assert.Equal("Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series", result);
+    }
+
+    [Fact]
+    public async Task ExportBooksToCsvAsync_UsesImportCompatibleFormat()
+    {
+        var condition = await _dbContext.Conditions.FirstAsync(c => c.Name == "New");
+        var authorA = new AuthorEntity { Name = "Author One" };
+        var authorB = new AuthorEntity { Name = "Author Two" };
+        var series = new SeriesEntity { Name = "Saga, \"Special\"" };
+        await _dbContext.Authors.AddRangeAsync(authorA, authorB);
+        await _dbContext.Series.AddAsync(series);
+        await _dbContext.SaveChangesAsync();
+
+        var book = new BookEntity
+        {
+            Title = "Book, \"Quoted\"",
+            ConditionId = condition.Id,
+            YearFirstPublished = 2021,
+            Isbn = "978-1",
+            Edition = "First",
+            YearEditionPublished = 2022,
+            DateOfPurchase = new DateOnly(2023, 4, 5),
+            LocationOfPurchase = "Main, Branch",
+            SeriesId = series.Id
+        };
+        await _dbContext.Books.AddAsync(book);
+        await _dbContext.SaveChangesAsync();
+
+        await _dbContext.BookAuthors.AddRangeAsync(
+            new BookAuthorEntity { BookId = book.Id, AuthorId = authorA.Id },
+            new BookAuthorEntity { BookId = book.Id, AuthorId = authorB.Id });
+        await _dbContext.SaveChangesAsync();
+
+        var repository = new AdminBookRepository(_dbContext);
+
+        var result = await repository.ExportBooksToCsvAsync(CancellationToken.None);
+
+        Assert.Contains("Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series", result);
+        Assert.Contains("\"Book, \"\"Quoted\"\"\"", result);
+        Assert.Contains("Author One|Author Two", result);
+        Assert.Contains(",New,2021,First,2022,2023-04-05,", result);
+        Assert.Contains("\"Main, Branch\"", result);
+        Assert.Contains("\"Saga, \"\"Special\"\"\"", result);
+    }
+
     private static Stream MakeCsvStream(params string[] lines)
     {
         string content = string.Join('\n', lines);

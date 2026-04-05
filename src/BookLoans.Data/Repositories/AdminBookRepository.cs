@@ -582,6 +582,48 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 		return new BookImportResult { SuccessCount = successCount, Errors = errors };
 	}
 
+	public async Task<string> ExportBooksToCsvAsync(CancellationToken ct)
+	{
+		const string header = "Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series";
+
+		List<BookEntity> books = await dbContext.Books
+			.AsNoTracking()
+			.Include(book => book.ConditionEntity)
+			.Include(book => book.BookAuthors)
+			.ThenInclude(bookAuthor => bookAuthor.AuthorEntity)
+			.Include(book => book.Series)
+			.ToListAsync(ct);
+
+		List<string> lines = [header];
+
+		foreach (BookEntity book in books
+			.OrderBy(entity => (entity.Series?.Name ?? entity.Title).NormalizeForSort())
+			.ThenBy(entity => entity.Title.NormalizeForSort()))
+		{
+			string authors = string.Join('|', book.BookAuthors
+				.OrderBy(bookAuthor => bookAuthor.AuthorEntity.Name)
+				.Select(bookAuthor => bookAuthor.AuthorEntity.Name));
+
+			string[] fields =
+			[
+				book.Title,
+				authors,
+				book.Isbn ?? string.Empty,
+				book.ConditionEntity.Name,
+				book.YearFirstPublished.ToString(),
+				book.Edition ?? string.Empty,
+				book.YearEditionPublished?.ToString() ?? string.Empty,
+				book.DateOfPurchase?.ToString("yyyy-MM-dd") ?? string.Empty,
+				book.LocationOfPurchase ?? string.Empty,
+				book.Series?.Name ?? string.Empty
+			];
+
+			lines.Add(string.Join(',', fields.Select(EscapeCsvField)));
+		}
+
+		return string.Join('\n', lines);
+	}
+
 	private static List<string[]> ParseCsvRows(Stream stream)
 	{
 		List<string[]> rows = [];
@@ -654,4 +696,14 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 
 	private static string GetField(string[] row, int index)
 		=> index >= 0 && index < row.Length ? row[index] : string.Empty;
+
+	private static string EscapeCsvField(string value)
+	{
+		if (value.Contains('"'))
+			value = value.Replace("\"", "\"\"");
+
+		return value.IndexOfAny([',', '"', '\r', '\n']) >= 0
+			? $"\"{value}\""
+			: value;
+	}
 }

@@ -340,4 +340,20 @@ public class AdminBookServiceTests
         mockRepository.Verify(r => r.ImportBooksFromCsvAsync(stream, It.IsAny<CancellationToken>()), Times.Once);
         Assert.Same(expectedResult, result);
     }
+
+    [Fact]
+    public async Task ExportBooksToCsvAsync_DelegatesToRepository()
+    {
+        var mockRepository = new Mock<IAdminBookRepository>();
+        const string expectedCsv = "Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series";
+        mockRepository
+            .Setup(r => r.ExportBooksToCsvAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedCsv);
+        var service = new AdminBookService(mockRepository.Object);
+
+        var result = await service.ExportBooksToCsvAsync(CancellationToken.None);
+
+        mockRepository.Verify(r => r.ExportBooksToCsvAsync(It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal(expectedCsv, result);
+    }
 }

@@ -380,4 +380,26 @@ public class AdminControllerTests
         Assert.Contains("Title", content);
         Assert.Contains("Authors", content);
     }
+
+    [Fact]
+    public async Task BulkExportBooks_ReturnsFile()
+    {
+        const string csv = "Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series\nBook A,Author One,,New,2020,,,,,";
+        var bookService = new Mock<IAdminBookService>();
+        bookService
+            .Setup(s => s.ExportBooksToCsvAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(csv);
+        var authorService = new Mock<IAdminAuthorService>();
+        var borrowerService = new Mock<IAdminBorrowerService>();
+        var conditionService = new Mock<IAdminConditionService>();
+        var checkoutService = new Mock<IAdminCheckoutService>();
+        var controller = new AdminController(bookService.Object, authorService.Object, borrowerService.Object, conditionService.Object, checkoutService.Object);
+
+        var result = await controller.BulkExportBooks(CancellationToken.None);
+
+        var fileResult = Assert.IsType<FileContentResult>(result);
+        Assert.Equal("text/csv", fileResult.ContentType);
+        Assert.Equal("books-export.csv", fileResult.FileDownloadName);
+        Assert.Equal(csv, System.Text.Encoding.UTF8.GetString(fileResult.FileContents));
+    }
 }

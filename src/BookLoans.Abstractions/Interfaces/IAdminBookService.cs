@@ -27,4 +27,6 @@ public interface IAdminBookService
     Task<string?> DeleteAsync(int id, CancellationToken ct);
 
     Task<BookImportResult> ImportBooksFromCsvAsync(Stream stream, CancellationToken ct);
+
+    Task<string> ExportBooksToCsvAsync(CancellationToken ct);
 }

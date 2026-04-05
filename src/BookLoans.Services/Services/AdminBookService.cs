@@ -40,4 +40,7 @@ public class AdminBookService(IAdminBookRepository repository) : IAdminBookServi
 
     public Task<BookImportResult> ImportBooksFromCsvAsync(Stream stream, CancellationToken ct)
         => repository.ImportBooksFromCsvAsync(stream, ct);
+
+    public Task<string> ExportBooksToCsvAsync(CancellationToken ct)
+        => repository.ExportBooksToCsvAsync(ct);
 }

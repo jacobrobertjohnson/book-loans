@@ -223,6 +223,13 @@ public class AdminController(
     }
 
     [HttpGet]
+    public async Task<IActionResult> BulkExportBooks(CancellationToken ct)
+    {
+        string csv = await bookService.ExportBooksToCsvAsync(ct);
+        return File(Encoding.UTF8.GetBytes(csv), "text/csv", "books-export.csv");
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Authors(CancellationToken ct)
     {
         AuthorsIndexViewModel viewModel = AuthorsIndexViewModel.FromDtos(await authorService.GetAuthorsAsync(ct));
