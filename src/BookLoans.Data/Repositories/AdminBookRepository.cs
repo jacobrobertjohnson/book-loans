@@ -3,6 +3,7 @@ using BookLoans.Abstractions.Interfaces;
 using BookLoans.Abstractions.Models;
 using BookLoans.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace BookLoans.Data.Repositories;
 
@@ -472,4 +473,185 @@ public class AdminBookRepository(AppDbContext dbContext) : IAdminBookRepository
 			.Distinct(StringComparer.OrdinalIgnoreCase)
 			.ToList();
 	}
+
+	public async Task<BookImportResult> ImportBooksFromCsvAsync(Stream stream, CancellationToken ct)
+	{
+		List<string[]> rows = ParseCsvRows(stream);
+
+		if (rows.Count < 2)
+			return new BookImportResult();
+
+		string[] header = rows[0];
+		int titleIdx = FindColumnIndex(header, "Title");
+		int authorsIdx = FindColumnIndex(header, "Authors");
+		int isbnIdx = FindColumnIndex(header, "ISBN");
+		int conditionIdx = FindColumnIndex(header, "Condition");
+		int yearFirstPublishedIdx = FindColumnIndex(header, "YearFirstPublished");
+		int editionIdx = FindColumnIndex(header, "Edition");
+		int yearEditionPublishedIdx = FindColumnIndex(header, "YearEditionPublished");
+		int dateOfPurchaseIdx = FindColumnIndex(header, "DateOfPurchase");
+		int locationOfPurchaseIdx = FindColumnIndex(header, "LocationOfPurchase");
+		int seriesIdx = FindColumnIndex(header, "Series");
+
+		if (titleIdx < 0 || authorsIdx < 0 || conditionIdx < 0 || yearFirstPublishedIdx < 0)
+			return new BookImportResult { Errors = [new BookImportRowError(0, string.Empty, "CSV is missing required columns: Title, Authors, Condition, and YearFirstPublished are required.")] };
+
+		Dictionary<string, int> conditionIdsByName = await dbContext.Conditions
+			.AsNoTracking()
+			.ToDictionaryAsync(c => c.Name, c => c.Id, StringComparer.OrdinalIgnoreCase, ct);
+
+		int successCount = 0;
+		List<BookImportRowError> errors = [];
+
+		for (int i = 1; i < rows.Count; i++)
+		{
+			string[] row = rows[i];
+			int rowNumber = i + 1;
+			string title = GetField(row, titleIdx);
+
+			if (string.IsNullOrWhiteSpace(title))
+				continue;
+
+			string authorsRaw = GetField(row, authorsIdx);
+			string newAuthorNames = string.Join('\n', authorsRaw
+				.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+				.Where(a => !string.IsNullOrWhiteSpace(a)));
+
+			string conditionName = GetField(row, conditionIdx);
+			if (!conditionIdsByName.TryGetValue(conditionName, out int conditionId))
+			{
+				errors.Add(new BookImportRowError(rowNumber, title, $"Unknown condition \"{conditionName}\". Valid values are: {string.Join(", ", conditionIdsByName.Keys)}."));
+				continue;
+			}
+
+			string yearRaw = GetField(row, yearFirstPublishedIdx);
+			if (!int.TryParse(yearRaw, out int yearFirstPublished))
+			{
+				errors.Add(new BookImportRowError(rowNumber, title, $"Invalid YearFirstPublished value \"{yearRaw}\". Must be an integer."));
+				continue;
+			}
+
+			int? yearEditionPublished = null;
+			string yearEditionRaw = GetField(row, yearEditionPublishedIdx);
+			if (!string.IsNullOrWhiteSpace(yearEditionRaw))
+			{
+				if (!int.TryParse(yearEditionRaw, out int parsedYearEdition))
+				{
+					errors.Add(new BookImportRowError(rowNumber, title, $"Invalid YearEditionPublished value \"{yearEditionRaw}\". Must be an integer."));
+					continue;
+				}
+
+				yearEditionPublished = parsedYearEdition;
+			}
+
+			DateOnly? dateOfPurchase = null;
+			string dateRaw = GetField(row, dateOfPurchaseIdx);
+			if (!string.IsNullOrWhiteSpace(dateRaw))
+			{
+				if (!DateOnly.TryParse(dateRaw, out DateOnly parsedDate))
+				{
+					errors.Add(new BookImportRowError(rowNumber, title, $"Invalid DateOfPurchase value \"{dateRaw}\". Expected format: YYYY-MM-DD."));
+					continue;
+				}
+
+				dateOfPurchase = parsedDate;
+			}
+
+			Book book = new()
+			{
+				Title = title,
+				NewAuthorNames = newAuthorNames,
+				SelectedAuthorIds = [],
+				Isbn = GetField(row, isbnIdx).NormalizeOrNull(),
+				ConditionId = conditionId,
+				YearFirstPublished = yearFirstPublished,
+				Edition = GetField(row, editionIdx).NormalizeOrNull(),
+				YearEditionPublished = yearEditionPublished,
+				DateOfPurchase = dateOfPurchase,
+				LocationOfPurchase = GetField(row, locationOfPurchaseIdx).NormalizeOrNull(),
+				NewSeriesName = GetField(row, seriesIdx).NormalizeOrNull()
+			};
+
+			string? error = await CreateAsync(book, ct);
+			if (error is not null)
+				errors.Add(new BookImportRowError(rowNumber, title, error));
+			else
+				successCount++;
+		}
+
+		return new BookImportResult { SuccessCount = successCount, Errors = errors };
+	}
+
+	private static List<string[]> ParseCsvRows(Stream stream)
+	{
+		List<string[]> rows = [];
+		using StreamReader reader = new(stream, leaveOpen: true);
+		string? line;
+		while ((line = reader.ReadLine()) is not null)
+		{
+			if (!string.IsNullOrWhiteSpace(line))
+				rows.Add(SplitCsvRow(line));
+		}
+
+		return rows;
+	}
+
+	private static string[] SplitCsvRow(string line)
+	{
+		List<string> fields = [];
+		int i = 0;
+		while (i < line.Length)
+		{
+			if (line[i] == '"')
+			{
+				i++;
+					StringBuilder sb = new();
+				while (i < line.Length)
+				{
+					if (line[i] == '"')
+					{
+						i++;
+						if (i < line.Length && line[i] == '"')
+						{
+							sb.Append('"');
+							i++;
+						}
+						else
+							break;
+					}
+					else
+						sb.Append(line[i++]);
+				}
+
+				fields.Add(sb.ToString());
+				if (i < line.Length && line[i] == ',')
+					i++;
+			}
+			else
+			{
+				int comma = line.IndexOf(',', i);
+				if (comma < 0)
+				{
+					fields.Add(line[i..].Trim());
+					i = line.Length;
+				}
+				else
+				{
+					fields.Add(line[i..comma].Trim());
+					i = comma + 1;
+				}
+			}
+		}
+
+		if (line.Length > 0 && line[^1] == ',')
+			fields.Add(string.Empty);
+
+		return [.. fields];
+	}
+
+	private static int FindColumnIndex(string[] header, string name)
+		=> Array.FindIndex(header, col => string.Equals(col.Trim(), name, StringComparison.OrdinalIgnoreCase));
+
+	private static string GetField(string[] row, int index)
+		=> index >= 0 && index < row.Length ? row[index] : string.Empty;
 }

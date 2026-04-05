@@ -2,6 +2,7 @@ namespace BookLoans.UnitTests.Repositories;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -792,5 +793,163 @@ public class AdminBookRepositoryTests : IAsyncLifetime
         Assert.Null(result);
         Assert.False(await _dbContext.Books.AnyAsync(entity => entity.Id == book.Id));
         Assert.False(await _dbContext.BookLoans.AnyAsync(entity => entity.BookId == book.Id));
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithHeaderOnly_ReturnsEmptyResult()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream("Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Empty(result.Errors);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithEmptyStream_ReturnsEmptyResult()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(string.Empty);
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Empty(result.Errors);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithMissingRequiredColumns_ReturnsError()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream("Title,ISBN\nMy Book,123");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Single(result.Errors);
+        Assert.Contains("required columns", result.Errors[0].ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithValidRow_ImportsBook()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(
+            "Title,Authors,ISBN,Condition,YearFirstPublished",
+            "The Great Gatsby,F. Scott Fitzgerald,,New,1925");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(1, result.SuccessCount);
+        Assert.Empty(result.Errors);
+        Assert.True(await _dbContext.Books.AnyAsync(b => b.Title == "The Great Gatsby"));
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithPipeSeparatedAuthors_CreatesAllAuthors()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(
+            "Title,Authors,ISBN,Condition,YearFirstPublished",
+            "Co-authored Book,Alice Smith|Bob Jones,,New,2020");
+
+        await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.True(await _dbContext.Authors.AnyAsync(a => a.Name == "Alice Smith"));
+        Assert.True(await _dbContext.Authors.AnyAsync(a => a.Name == "Bob Jones"));
+        var book = await _dbContext.Books.FirstAsync(b => b.Title == "Co-authored Book");
+        Assert.Equal(2, await _dbContext.BookAuthors.CountAsync(ba => ba.BookId == book.Id));
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithUnknownCondition_ReportsError()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(
+            "Title,Authors,ISBN,Condition,YearFirstPublished",
+            "Bad Book,Some Author,,NonExistentCondition,2020");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Single(result.Errors);
+        Assert.Contains("NonExistentCondition", result.Errors[0].ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithInvalidYear_ReportsError()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(
+            "Title,Authors,ISBN,Condition,YearFirstPublished",
+            "Bad Year Book,Some Author,,New,notAYear");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Single(result.Errors);
+        Assert.Contains("YearFirstPublished", result.Errors[0].ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_PartialSuccess_ReportsCorrectCounts()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(
+            "Title,Authors,ISBN,Condition,YearFirstPublished",
+            "Good Book,Author One,,New,2000",
+            "Bad Book,Author Two,,InvalidCondition,2001",
+            "Another Good Book,Author Three,,Used,2002");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(2, result.SuccessCount);
+        Assert.Single(result.Errors);
+        Assert.Equal(3, result.Errors[0].RowNumber);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_WithOptionalFields_ImportsCorrectly()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(
+            "Title,Authors,ISBN,Condition,YearFirstPublished,Edition,YearEditionPublished,DateOfPurchase,LocationOfPurchase,Series",
+            "Full Book,Author One,978-0000000001,New,1990,2nd,2000,2000-01-15,Library Store,My Series");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(1, result.SuccessCount);
+        Assert.Empty(result.Errors);
+        var book = await _dbContext.Books.FirstAsync(b => b.Title == "Full Book");
+        Assert.Equal("978-0000000001", book.Isbn);
+        Assert.Equal("2nd", book.Edition);
+        Assert.Equal(2000, book.YearEditionPublished);
+        Assert.Equal(new DateOnly(2000, 1, 15), book.DateOfPurchase);
+        Assert.Equal("Library Store", book.LocationOfPurchase);
+        Assert.NotNull(book.SeriesId);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_SkipsBlankRows()
+    {
+        var repository = new AdminBookRepository(_dbContext);
+        using var stream = MakeCsvStream(
+            "Title,Authors,ISBN,Condition,YearFirstPublished",
+            "Real Book,Some Author,,New,2020",
+            "   ",
+            "Another Real Book,Other Author,,Used,2021");
+
+        var result = await repository.ImportBooksFromCsvAsync(stream, CancellationToken.None);
+
+        Assert.Equal(2, result.SuccessCount);
+        Assert.Empty(result.Errors);
+    }
+
+    private static Stream MakeCsvStream(params string[] lines)
+    {
+        string content = string.Join('\n', lines);
+        return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
     }
 }

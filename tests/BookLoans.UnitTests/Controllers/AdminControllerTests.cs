@@ -2,6 +2,7 @@ namespace BookLoans.UnitTests.Controllers;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using BookLoans.Abstractions.Models;
@@ -10,6 +11,7 @@ using BookLoans.Web.Controllers;
 using BookLoans.Web.Models;
 using Moq;
 using Xunit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 public class AdminControllerTests
@@ -298,5 +300,84 @@ public class AdminControllerTests
 
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(AdminController.Borrowers), redirectResult.ActionName);
+    }
+
+    [Fact]
+    public void BulkImportBooks_Get_ReturnsView()
+    {
+        var bookService = new Mock<IAdminBookService>();
+        var authorService = new Mock<IAdminAuthorService>();
+        var borrowerService = new Mock<IAdminBorrowerService>();
+        var conditionService = new Mock<IAdminConditionService>();
+        var checkoutService = new Mock<IAdminCheckoutService>();
+        var controller = new AdminController(bookService.Object, authorService.Object, borrowerService.Object, conditionService.Object, checkoutService.Object);
+
+        var result = controller.BulkImportBooks();
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.IsType<BookImportViewModel>(viewResult.Model);
+    }
+
+    [Fact]
+    public async Task BulkImportBooks_Post_WithNullFile_ReturnsViewWithError()
+    {
+        var bookService = new Mock<IAdminBookService>();
+        var authorService = new Mock<IAdminAuthorService>();
+        var borrowerService = new Mock<IAdminBorrowerService>();
+        var conditionService = new Mock<IAdminConditionService>();
+        var checkoutService = new Mock<IAdminCheckoutService>();
+        var controller = new AdminController(bookService.Object, authorService.Object, borrowerService.Object, conditionService.Object, checkoutService.Object);
+
+        var result = await controller.BulkImportBooks(null, CancellationToken.None);
+
+        Assert.IsType<ViewResult>(result);
+        Assert.False(controller.ModelState.IsValid);
+    }
+
+    [Fact]
+    public async Task BulkImportBooks_Post_WithValidFile_ReturnsViewWithResult()
+    {
+        var importResult = new BookImportResult { SuccessCount = 2 };
+        var bookService = new Mock<IAdminBookService>();
+        bookService
+            .Setup(s => s.ImportBooksFromCsvAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(importResult);
+        var authorService = new Mock<IAdminAuthorService>();
+        var borrowerService = new Mock<IAdminBorrowerService>();
+        var conditionService = new Mock<IAdminConditionService>();
+        var checkoutService = new Mock<IAdminCheckoutService>();
+        var controller = new AdminController(bookService.Object, authorService.Object, borrowerService.Object, conditionService.Object, checkoutService.Object);
+
+        var csvBytes = System.Text.Encoding.UTF8.GetBytes("Title,Authors,Condition,YearFirstPublished\nBook One,Author A,New,2020");
+        var formFile = new Mock<IFormFile>();
+        formFile.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .Callback<Stream, CancellationToken>((s, _) => s.Write(csvBytes));
+
+        var result = await controller.BulkImportBooks(formFile.Object, CancellationToken.None);
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<BookImportViewModel>(viewResult.Model);
+        Assert.NotNull(model.ImportResult);
+        Assert.Equal(2, model.ImportResult.SuccessCount);
+    }
+
+    [Fact]
+    public void BulkImportBooksTemplate_ReturnsFile()
+    {
+        var bookService = new Mock<IAdminBookService>();
+        var authorService = new Mock<IAdminAuthorService>();
+        var borrowerService = new Mock<IAdminBorrowerService>();
+        var conditionService = new Mock<IAdminConditionService>();
+        var checkoutService = new Mock<IAdminCheckoutService>();
+        var controller = new AdminController(bookService.Object, authorService.Object, borrowerService.Object, conditionService.Object, checkoutService.Object);
+
+        var result = controller.BulkImportBooksTemplate();
+
+        var fileResult = Assert.IsType<FileContentResult>(result);
+        Assert.Equal("text/csv", fileResult.ContentType);
+        Assert.Equal("books-import-template.csv", fileResult.FileDownloadName);
+        var content = System.Text.Encoding.UTF8.GetString(fileResult.FileContents);
+        Assert.Contains("Title", content);
+        Assert.Contains("Authors", content);
     }
 }

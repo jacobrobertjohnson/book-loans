@@ -25,4 +25,6 @@ public interface IAdminBookRepository
     Task<string?> UpdateAsync(int id, Book model, CancellationToken ct);
 
     Task<string?> DeleteAsync(int id, CancellationToken ct);
+
+    Task<BookImportResult> ImportBooksFromCsvAsync(Stream stream, CancellationToken ct);
 }
