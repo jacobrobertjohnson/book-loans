@@ -1,0 +1,74 @@
+@using BookLoans.Abstractions.Models
+@model BookImportViewModel
+@{
+    ViewData["Title"] = "Import Books";
+}
+
+<div class="page-title-row">
+    <a class="back-arrow" asp-action="Books" title="Back to Manage Books">&#8592;</a>
+    <h1 class="page-title">Import Books</h1>
+</div>
+
+<div class="card form-shell">
+    <p>
+        Upload a CSV file to import multiple books at once. Each row represents one book.
+        Authors should be separated by pipe characters (<code>|</code>).
+        The <strong>Condition</strong> column must match an existing condition name (e.g. <em>New</em>, <em>Used</em>).
+    </p>
+    <p>
+        <a asp-action="BulkImportBooksTemplate">Download CSV template</a>
+    </p>
+
+    <form asp-action="BulkImportBooks" method="post" enctype="multipart/form-data" class="form-shell">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="message-error"></div>
+
+        <div class="field">
+            <label for="csvFile">CSV File <small class="required-note">(required)</small></label>
+            <input type="file" id="csvFile" name="csvFile" accept=".csv,text/csv" />
+        </div>
+
+        <div class="actions-row">
+            <button type="submit" class="button-primary">Import</button>
+        </div>
+    </form>
+</div>
+
+@if (Model.ImportResult is BookImportResult result)
+{
+    <div class="card">
+        @if (result.SuccessCount > 0)
+        {
+            <p class="message-success">Successfully imported @result.SuccessCount book@(result.SuccessCount == 1 ? string.Empty : "s").</p>
+        }
+
+        @if (result.Errors.Count > 0)
+        {
+            <p class="message-error">@result.Errors.Count row@(result.Errors.Count == 1 ? string.Empty : "s") could not be imported:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>Title</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (BookImportRowError error in result.Errors)
+                    {
+                        <tr>
+                            <td>@error.RowNumber</td>
+                            <td>@error.Title</td>
+                            <td>@error.ErrorMessage</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (result.SuccessCount == 0 && result.Errors.Count == 0)
+        {
+            <p class="muted">No data rows found in the uploaded file.</p>
+        }
+    </div>
+}
